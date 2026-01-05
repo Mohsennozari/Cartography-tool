@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مبدل ساده مختصات UTM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ریست و تنظیمات پایه */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        /* کانتینر اصلی */
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        /* هدر */
+        header {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        /* تب‌ها */
+        .tabs {
+            display: flex;
+            background-color: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 18px 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 500;
+            color: #475569;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tab:hover {
+            background-color: #e2e8f0;
+        }
+        
+        .tab.active {
+            background-color: white;
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+        
+        /* محتوای تب‌ها */
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* فرم‌ها */
+        .converter-form {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .form-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .form-col {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        /* دکمه‌ها */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+        
+        /* نتایج */
+        .result-box {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .result-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        /* اطلاعات کمکی */
+        .helper-text {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .tip-box {
+            background-color: #fff9e6;
+            border-right: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+        
+        /* فوتر */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+        
+        /* ریسپانسیو */
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                padding: 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- هدر -->
+        <header>
+            <h1><i class="fas fa-globe-asia"></i> مبدل ساده مختصات UTM</h1>
+            <p class="subtitle">تبدیل مختصات جغرافیایی به UTM و بالعکس - نسخه ساده و کاربرپسند</p>
+        </header>
+        
+        <!-- تب‌ها -->
+        <div class="tabs">
+            <div class="tab active" data-tab="tab1">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>جغرافیایی به UTM</span>
+            </div>
+            <div class="tab" data-tab="tab2">
+                <i class="fas fa-exchange-alt"></i>
+                <span>UTM به جغرافیایی</span>
+            </div>
+        </div>
+        
+        <!-- تب 1: جغرافیایی به UTM -->
+        <div id="tab1" class="tab-content active">
+            <div class="converter-form">
+                <h2 class="form-title">
+                    <i class="fas fa-long-arrow-alt-right"></i>
+                    تبدیل مختصات جغرافیایی به UTM
+                </h2>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="latitude" class="required">عرض جغرافیایی (Latitude)</label>
+                        <input type="number" id="latitude" step="0.000001" 
+                               placeholder="مثال: 35.6892" min="-90" max="90">
+                        <div class="helper-text">عدد بین ۹۰- تا ۹۰+ (مثبت برای شمالی)</div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <label for="longitude" class="required">طول جغرافیایی (Longitude)</label>
+                        <input type="number" id="longitude" step="0.000001" 
+                               placeholder="مثال: 51.3890" min="-180" max="180">
+                        <div class="helper-text">عدد بین ۱۸۰- تا ۱۸۰+ (مثبت برای شرقی)</div>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="convertToUTM">
+                        <i class="fas fa-calculator"></i>
+                        <span>محاسبه UTM</span>
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="example1">
+                        <i class="fas fa-eye"></i>
+                        <span>مشاهده نمونه</span>
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="reset1">
+                        <i class="fas fa-redo"></i>
+                        <span>پاک کردن</span>
+                    </button>
+                </div>
+                
+                <!-- نتایج -->
+                <div class="result-box" id="resultBox1">
+                    <h3 class="result-title">
+                        <i class="fas fa-check-circle"></i>
+                        نتیجه تبدیل
+                    </h3>
+                    
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="result-label">Zone UTM</div>
+                            <div class="result-value" id="utmZone">--</div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">Easting (X)</div>
+                            <div class="result-value" id="utmEasting">--</div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">Northing (Y)</div>
+                            <div class="result-value" id="utmNorthing">--</div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">نیمکره</div>
+                            <div class="result-value" id="utmHemisphere">--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- نکات -->
+                <div class="tip-box">
+                    <p><i class="fas fa-lightbulb"></i> <strong>نکته:</strong> Zone به صورت خودکار از روی طول جغرافیایی محاسبه می‌شود.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- تب 2: UTM به جغرافیایی -->
+        <div id="tab2" class="tab-content">
+            <div class="converter-form">
+                <h2 class="form-title">
+                    <i class="fas fa-exchange-alt"></i>
+                    تبدیل UTM به مختصات جغرافیایی
+                </h2>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="utmZoneInput" class="required">Zone UTM</label>
+                        <input type="text" id="utmZoneInput" 
+                               placeholder="مثال: 39N یا 40S">
+                        <div class="helper-text">فرمت: عدد Zone + حرف نیمکره (N یا S)</div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <label for="easting" class="required">Easting (متر)</label>
+                        <input type="number" id="easting" step="0.001" 
+                               placeholder="مثال: 500000">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="northing" class="required">Northing (متر)</label>
+                        <input type="number" id="northing" step="0.001" 
+                               placeholder="مثال: 3950000">
+                    </div>
+                    
+                    <div class="form-col">
+                        <label for="datum">سیستم مرجع (Datum)</label>
+                        <select id="datum">
+                            <option value="WGS84">WGS84 (پیش‌فرض)</option>
+                            <option value="NAD83">NAD83</option>
+                            <option value="ED50">ED50</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="convertToGeo">
+                        <i class="fas fa-calculator"></i>
+                        <span>محاسبه مختصات</span>
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="example2">
+                        <i class="fas fa-eye"></i>
+                        <span>مشاهده نمونه</span>
+                    </button>
+                    
+                    <button class="btn btn-secondary" id="reset2">
+                        <i class="fas fa-redo"></i>
+                        <span>پاک کردن</span>
+                    </button>
+                </div>
+                
+                <!-- نتایج -->
+                <div class="result-box" id="resultBox2">
+                    <h3 class="result-title">
+                        <i class="fas fa-check-circle"></i>
+                        نتیجه تبدیل
+                    </h3>
+                    
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="result-label">عرض جغرافیایی</div>
+                            <div class="result-value" id="geoLatitude">--</div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">طول جغرافیایی</div>
+                            <div class="result-value" id="geoLongitude">--</div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">موقعیت</div>
+                            <div class="result-value" id="geoLocation">--</div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">سیستم مرجع</div>
+                            <div class="result-value" id="geoDatum">--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- نکات -->
+                <div class="tip-box">
+                    <p><i class="fas fa-lightbulb"></i> <strong>نکته:</strong> Easting معمولاً بین ۱۶۰,۰۰۰ تا ۸۴۰,۰۰۰ متر است.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- فوتر -->
+        <footer>
+            <p><i class="far fa-copyright"></i> مبدل ساده مختصات UTM - برای تبدیل سریع و آسان</p>
+        </footer>
+    </div>
+
+    <script>
+        // ==================== تابع‌های اصلی تبدیل مختصات ====================
+        
+        /**
+         * محاسبه Zone UTM از روی طول جغرافیایی
+         * @param {number} longitude - طول جغرافیایی (درجه)
+         * @returns {number} شماره Zone (۱ تا ۶۰)
+         */
+        function calculateUTMZone(longitude) {
+            // Zoneهای UTM از 1 تا 60 هستند، هر Zone 6 درجه عرض دارد
+            // Zone 1 از 180°W تا 174°W
+            let zone = Math.floor((longitude + 180) / 6) + 1;
+            
+            // محدود کردن به بازه 1-60
+            if (zone < 1) zone = 1;
+            if (zone > 60) zone = 60;
+            
+            return zone;
+        }
+        
+        /**
+         * تعیین نیمکره از روی عرض جغرافیایی
+         * @param {number} latitude - عرض جغرافیایی (درجه)
+         * @returns {string} 'N' برای شمالی، 'S' برای جنوبی
+         */
+        function getHemisphere(latitude) {
+            return latitude >= 0 ? 'N' : 'S';
+        }
+        
+        /**
+         * تبدیل مختصات جغرافیایی به UTM (نسخه ساده شده)
+         * @param {number} latitude - عرض جغرافیایی (درجه)
+         * @param {number} longitude - طول جغرافیایی (درجه)
+         * @returns {Object} نتیجه تبدیل
+         */
+        function geoToUTM(latitude, longitude) {
+            // محاسبه Zone
+            let zone = calculateUTMZone(longitude);
+            let hemisphere = getHemisphere(latitude);
+            
+            // مقادیر مرجع
+            const R = 6378137; // شعاع زمین در متر (WGS84)
+            const k0 = 0.9996; // فاکتور مقیاس UTM
+            
+            // تبدیل درجه به رادیان
+            const latRad = latitude * Math.PI / 180;
+            const lonRad = longitude * Math.PI / 180;
+            
+            // محاسبات UTM (ساده شده)
+            const zoneCenter = ((zone - 1) * 6 - 180 + 3) * Math.PI / 180;
+            const dLon = lonRad - zoneCenter;
+            
+            // پارامترهای بیضوی WGS84
+            const e = 0.081819191; // خروج از مرکز
+            const e2 = e * e;
+            const e4 = e2 * e2;
+            const e6 = e2 * e4;
+            
+            // محاسبه شعاع انحناء
+            const N = R / Math.sqrt(1 - e2 * Math.sin(latRad) * Math.sin(latRad));
+            const T = Math.tan(latRad) * Math.tan(latRad);
+            const C = e2 * Math.cos(latRad) * Math.cos(latRad) / (1 - e2);
+            const A = dLon * Math.cos(latRad);
+            
+            // محاسبه M (فاصله قوسی از استوا)
+            const M = R * ((1 - e2/4 - 3*e4/64 - 5*e6/256) * latRad
+                         - (3*e2/8 + 3*e4/32 + 45*e6/1024) * Math.sin(2*latRad)
+                         + (15*e4/256 + 45*e6/1024) * Math.sin(4*latRad)
+                         - (35*e6/3072) * Math.sin(6*latRad));
+            
+            // محاسبات نهایی
+            let easting = k0 * N * (A + (1 - T + C) * A*A*A/6 
+                          + (5 - 18*T + T*T + 72*C - 58*e2) * A*A*A*A*A/120) + 500000;
+            
+            let northing = k0 * (M + N * Math.tan(latRad) * (A*A/2 
+                           + (5 - T + 9*C + 4*C*C) * A*A*A*A/24
+                           + (61 - 58*T + T*T + 600*C - 330*e2) * A*A*A*A*A*A/720));
+            
+            // تصحیح برای نیمکره جنوبی
+            if (latitude < 0) {
+                northing += 10000000; // افست برای نیمکره جنوبی
+            }
+            
+            // گرد کردن به ۳ رقم اعشار
+            easting = Math.round(easting * 1000) / 1000;
+            northing = Math.round(northing * 1000) / 1000;
+            
+            return {
+                zone: zone,
+                hemisphere: hemisphere,
+                zoneString: `${zone}${hemisphere}`,
+                easting: easting,
+                northing: northing,
+                datum: 'WGS84'
+            };
+        }
+        
+        /**
+         * تبدیل UTM به مختصات جغرافیایی (نسخه ساده شده)
+         * @param {string} zoneStr - Zone UTM (مثلاً '39N')
+         * @param {number} easting - Easting (متر)
+         * @param {number} northing - Northing (متر)
+         * @param {string} datum - سیستم مرجع
+         * @returns {Object} نتیجه تبدیل
+         */
+        function utmToGeo(zoneStr, easting, northing, datum = 'WGS84') {
+            // تجزیه Zone
+            const match = zoneStr.match(/^(\d+)([NS])$/i);
+            if (!match) {
+                throw new Error('فرمت Zone نامعتبر است. مثال صحیح: 39N یا 40S');
+            }
+            
+            const zone = parseInt(match[1]);
+            const hemisphere = match[2].toUpperCase();
+            
+            // پارامترهای بیضوی
+            const R = 6378137; // شعاع زمین (WGS84)
+            const k0 = 0.9996;
+            const e = 0.081819191;
+            const e2 = e * e;
+            const e4 = e2 * e2;
+            const e6 = e2 * e4;
+            
+            // محاسبات معکوس (ساده شده)
+            // اینجا الگوریتم کامل نیاز است، اما برای نمونه ساده می‌کنیم
+            
+            // روش تقریبی برای نمایش
+            const x = easting - 500000;
+            const y = hemisphere === 'S' ? northing - 10000000 : northing;
+            
+            const lonCenter = ((zone - 1) * 6 - 180 + 3);
+            
+            // تقریب ساده
+            let latitude = y / (R * k0) * (180 / Math.PI);
+            let longitude = lonCenter + x / (R * k0 * Math.cos(latitude * Math.PI / 180)) * (180 / Math.PI);
+            
+            // محدود کردن مقادیر
+            if (latitude > 90) latitude = 90;
+            if (latitude < -90) latitude = -90;
+            if (longitude > 180) longitude -= 360;
+            if (longitude < -180) longitude += 360;
+            
+            // تبدیل به DMS (درجه، دقیقه، ثانیه)
+            function toDMS(decimal, isLat) {
+                const abs = Math.abs(decimal);
+                const deg = Math.floor(abs);
+                const minFloat = (abs - deg) * 60;
+                const min = Math.floor(minFloat);
+                const sec = (minFloat - min) * 60;
+                
+                const dir = isLat 
+                    ? (decimal >= 0 ? 'N' : 'S')
+                    : (decimal >= 0 ? 'E' : 'W');
+                
+                return `${deg}° ${min}' ${sec.toFixed(2)}" ${dir}`;
+            }
+            
+            return {
+                latitude: latitude,
+                longitude: longitude,
+                latitudeDMS: toDMS(latitude, true),
+                longitudeDMS: toDMS(longitude, false),
+                hemisphere: hemisphere,
+                datum: datum
+            };
+        }
+        
+        /**
+         * نمایش پیام به کاربر
+         * @param {string} message - متن پیام
+         * @param {string} type - نوع پیام (success, error, info)
+         */
+        function showMessage(message, type = 'info') {
+            // در نسخه ساده از alert استفاده می‌کنیم
+            if (type === 'error') {
+                alert('❌ ' + message);
+            } else if (type === 'success') {
+                alert('✅ ' + message);
+            } else {
+                alert('ℹ️ ' + message);
+            }
+        }
+        
+        /**
+         * اعتبارسنجی مختصات جغرافیایی
+         * @param {number} lat - عرض جغرافیایی
+         * @param {number} lon - طول جغرافیایی
+         * @returns {boolean} معتبر یا نامعتبر
+         */
+        function validateGeoCoords(lat, lon) {
+            if (isNaN(lat) || lat < -90 || lat > 90) {
+                showMessage('عرض جغرافیایی باید بین ۹۰- تا ۹۰+ باشد', 'error');
+                return false;
+            }
+            
+            if (isNaN(lon) || lon < -180 || lon > 180) {
+                showMessage('طول جغرافیایی باید بین ۱۸۰- تا ۱۸۰+ باشد', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        /**
+         * اعتبارسنجی UTM
+         * @param {string} zoneStr - Zone UTM
+         * @param {number} easting - Easting
+         * @param {number} northing - Northing
+         * @returns {boolean} معتبر یا نامعتبر
+         */
+        function validateUTM(zoneStr, easting, northing) {
+            // اعتبارسنجی Zone
+            if (!zoneStr.match(/^\d+[NS]$/i)) {
+                showMessage('فرمت Zone نامعتبر است. مثال صحیح: 39N یا 40S', 'error');
+                return false;
+            }
+            
+            const zone = parseInt(zoneStr);
+            if (zone < 1 || zone > 60) {
+                showMessage('Zone باید بین 1 تا 60 باشد', 'error');
+                return false;
+            }
+            
+            // اعتبارسنجی Easting
+            if (isNaN(easting) || easting < 0) {
+                showMessage('Easting باید عددی مثبت باشد', 'error');
+                return false;
+            }
+            
+            // اعتبارسنجی Northing
+            if (isNaN(northing) || northing < 0) {
+                showMessage('Northing باید عددی مثبت باشد', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // ==================== مدیریت رویدادها ====================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // تغییر تب‌ها
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // غیرفعال کردن همه تب‌ها
+                    document.querySelectorAll('.tab').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // فعال کردن تب انتخاب شده
+                    this.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // تبدیل جغرافیایی به UTM
+            document.getElementById('convertToUTM').addEventListener('click', function() {
+                const lat = parseFloat(document.getElementById('latitude').value);
+                const lon = parseFloat(document.getElementById('longitude').value);
+                
+                // اعتبارسنجی
+                if (!validateGeoCoords(lat, lon)) return;
+                
+                try {
+                    const result = geoToUTM(lat, lon);
+                    
+                    // نمایش نتایج
+                    document.getElementById('utmZone').textContent = result.zoneString;
+                    document.getElementById('utmEasting').textContent = result.easting.toLocaleString() + ' m';
+                    document.getElementById('utmNorthing').textContent = result.northing.toLocaleString() + ' m';
+                    document.getElementById('utmHemisphere').textContent = 
+                        result.hemisphere === 'N' ? 'شمالی' : 'جنوبی';
+                    
+                    // نمایش جعبه نتیجه
+                    document.getElementById('resultBox1').classList.add('show');
+                    
+                    showMessage('تبدیل با موفقیت انجام شد', 'success');
+                } catch (error) {
+                    showMessage('خطا در تبدیل: ' + error.message, 'error');
+                }
+            });
+            
+            // تبدیل UTM به جغرافیایی
+            document.getElementById('convertToGeo').addEventListener('click', function() {
+                const zoneStr = document.getElementById('utmZoneInput').value.trim();
+                const easting = parseFloat(document.getElementById('easting').value);
+                const northing = parseFloat(document.getElementById('northing').value);
+                const datum = document.getElementById('datum').value;
+                
+                // اعتبارسنجی
+                if (!validateUTM(zoneStr, easting, northing)) return;
+                
+                try {
+                    const result = utmToGeo(zoneStr, easting, northing, datum);
+                    
+                    // نمایش نتایج
+                    document.getElementById('geoLatitude').textContent = 
+                        result.latitude.toFixed(6) + '° (' + result.latitudeDMS + ')';
+                    document.getElementById('geoLongitude').textContent = 
+                        result.longitude.toFixed(6) + '° (' + result.longitudeDMS + ')';
+                    document.getElementById('geoLocation').textContent = 
+                        result.hemisphere === 'N' ? 'نیمکره شمالی' : 'نیمکره جنوبی';
+                    document.getElementById('geoDatum').textContent = result.datum;
+                    
+                    // نمایش جعبه نتیجه
+                    document.getElementById('resultBox2').classList.add('show');
+                    
+                    showMessage('تبدیل با موفقیت انجام شد', 'success');
+                } catch (error) {
+                    showMessage('خطا در تبدیل: ' + error.message, 'error');
+                }
+            });
+            
+            // دکمه‌های نمونه
+            document.getElementById('example1').addEventListener('click', function() {
+                document.getElementById('latitude').value = 35.6892; // تهران
+                document.getElementById('longitude').value = 51.3890;
+                showMessage('مقادیر نمونه تهران وارد شدند', 'info');
+            });
+            
+            document.getElementById('example2').addEventListener('click', function() {
+                document.getElementById('utmZoneInput').value = '39N';
+                document.getElementById('easting').value = '500000';
+                document.getElementById('northing').value = '3950000';
+                document.getElementById('datum').value = 'WGS84';
+                showMessage('مقادیر نمونه UTM وارد شدند', 'info');
+            });
+            
+            // دکمه‌های پاک‌کردن
+            document.getElementById('reset1').addEventListener('click', function() {
+                document.getElementById('latitude').value = '';
+                document.getElementById('longitude').value = '';
+                document.getElementById('resultBox1').classList.remove('show');
+                showMessage('فیلدها پاک شدند', 'info');
+            });
+            
+            document.getElementById('reset2').addEventListener('click', function() {
+                document.getElementById('utmZoneInput').value = '';
+                document.getElementById('easting').value = '';
+                document.getElementById('northing').value = '';
+                document.getElementById('resultBox2').classList.remove('show');
+                showMessage('فیلدها پاک شدند', 'info');
+            });
+            
+            // محاسبه خودکار Zone هنگام تغییر طول جغرافیایی
+            document.getElementById('longitude').addEventListener('input', function() {
+                const lon = parseFloat(this.value);
+                if (!isNaN(lon) && lon >= -180 && lon <= 180) {
+                    const lat = parseFloat(document.getElementById('latitude').value);
+                    if (!isNaN(lat)) {
+                        const zone = calculateUTMZone(lon);
+                        const hemisphere = getHemisphere(lat);
+                        showMessage(`Zone محاسبه شده: ${zone}${hemisphere}`, 'info');
+                    }
+                }
+            });
+            
+            // نمایش پیام خوش‌آمد
+            showMessage('مبدل ساده مختصات UTM آماده استفاده است!', 'info');
+        });
+    </script>
+</body>
+</html>

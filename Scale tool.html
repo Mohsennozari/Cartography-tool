@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ابزار تبدیل مقیاس نقشه - CartoScale</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css">
+    <style>
+        /* استایل کلی */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* هدر */
+        header {
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: #ecf0f1;
+        }
+
+        /* محتوای اصلی */
+        .main-content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* کارت‌ها */
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.4rem;
+        }
+
+        /* بخش تبدیل مقیاس */
+        .converter-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .input-with-unit {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-with-unit input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-with-unit input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .input-with-unit select {
+            padding: 12px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            background: white;
+            min-width: 100px;
+            cursor: pointer;
+        }
+
+        /* دکمه‌ها */
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .calculate-btn:hover {
+            background: linear-gradient(90deg, #2980b9, #1c6ea4);
+            transform: translateY(-2px);
+        }
+
+        /* بخش مقیاس‌های رایج */
+        .scales-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .scales-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .scales-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .scale-card {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .scale-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .scale-card h3 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+
+        .scale-card p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        /* بخش نتایج */
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .results-display {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .results-display h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .result-item {
+            margin: 15px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .result-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        /* بخش اطلاعات */
+        .info-section {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .info-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .formula-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .formula-box p {
+            margin: 8px 0;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        .tip-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .tip-box i {
+            font-size: 1.2rem;
+            margin-top: 3px;
+        }
+
+        /* فوتر */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-top: 1px solid #34495e;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .footer-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .footer-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .copyright {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        /* انیمیشن‌های ساده */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-map"></i> ابزار تبدیل مقیاس نقشه</h1>
+            <p class="subtitle">محاسبه مقیاس، فاصله واقعی و فاصله نقشه</p>
+        </header>
+
+        <div class="main-content">
+            <!-- سمت چپ: تبدیل مقیاس و مقیاس‌های رایج -->
+            <div class="converter-section">
+                <section class="card">
+                    <h2><i class="fas fa-exchange-alt"></i> تبدیل مقیاس</h2>
+                    
+                    <div class="input-group">
+                        <label>مقیاس عددی:</label>
+                        <div class="input-with-unit">
+                            <span style="padding: 12px 15px; background: #ecf0f1; border-radius: 10px;">۱:</span>
+                            <input type="number" id="scaleInput" value="1000" min="1">
+                        </div>
+                    </div>
+
+                    <button class="calculate-btn" onclick="updateScale()">
+                        <i class="fas fa-sync-alt"></i> به‌روزرسانی
+                    </button>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-ruler"></i> محاسبه فاصله</h2>
+                    
+                    <div class="input-group">
+                        <label>فاصله روی نقشه:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="mapDistance" value="5" step="0.1">
+                            <select id="mapUnit">
+                                <option value="cm">سانتیمتر</option>
+                                <option value="mm">میلی‌متر</option>
+                                <option value="inch">اینچ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>فاصله واقعی:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="realDistance" value="50" step="0.1">
+                            <select id="realUnit">
+                                <option value="m">متر</option>
+                                <option value="km">کیلومتر</option>
+                                <option value="feet">فوت</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <button class="calculate-btn" onclick="calculateRealFromMap()" style="font-size: 1rem; padding: 12px;">
+                            <i class="fas fa-map-marked-alt"></i> محاسبه فاصله واقعی
+                        </button>
+                        <button class="calculate-btn" onclick="calculateMapFromReal()" style="font-size: 1rem; padding: 12px;">
+                            <i class="fas fa-map-pin"></i> محاسبه فاصله نقشه
+                        </button>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-star"></i> مقیاس‌های رایج</h2>
+                    
+                    <div class="scales-grid">
+                        <div class="scale-card" onclick="setScale(500)">
+                            <h3>۱:۵۰۰</h3>
+                            <p>۱cm = 5m</p>
+                            <p>پلان ساختمان</p>
+                        </div>
+                        <div class="scale-card" onclick="setScale(1000)">
+                            <h3>۱:۱۰۰۰</h3>
+                            <p>۱cm = 10m</p>
+                            <p>طرح شهری</p>
+                        </div>
+                        <div class="scale-card" onclick="setScale(2000)">
+                            <h3>۱:۲۰۰۰</h3>
+                            <p>۱cm = 20m</p>
+                            <p>نقشه محلی</p>
+                        </div>
+                        <div class="scale-card" onclick="setScale(5000)">
+                            <h3>۱:۵۰۰۰</h3>
+                            <p>۱cm = 50m</p>
+                            <p>منطقه‌ای</p>
+                        </div>
+                        <div class="scale-card" onclick="setScale(25000)">
+                            <h3>۱:۲۵۰۰۰</h3>
+                            <p>۱cm = 250m</p>
+                            <p>توپوگرافی</p>
+                        </div>
+                        <div class="scale-card" onclick="setScale(50000)">
+                            <h3>۱:۵۰۰۰۰</h3>
+                            <p>۱cm = 500m</p>
+                            <p>ناحیه‌ای</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- سمت راست: نتایج و اطلاعات -->
+            <div class="results-section">
+                <section class="results-display">
+                    <h3><i class="fas fa-clipboard-check"></i> نتایج محاسبات</h3>
+                    
+                    <div class="result-item">
+                        <div class="result-label">مقیاس عددی:</div>
+                        <div class="result-value" id="displayScale">۱:۱۰۰۰</div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-label">مقیاس کلامی:</div>
+                        <div class="result-value" id="displayVerbal">۱ سانتیمتر = ۱۰ متر</div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-label">فاصله واقعی:</div>
+                        <div class="result-value" id="displayRealDistance">۵۰ متر</div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-label">فاصله روی نقشه:</div>
+                        <div class="result-value" id="displayMapDistance">۵ سانتیمتر</div>
+                    </div>
+                </section>
+
+                <section class="info-section">
+                    <h3><i class="fas fa-lightbulb"></i> آموزش مقیاس</h3>
+                    
+                    <div class="formula-box">
+                        <p><strong>فرمول اصلی:</strong></p>
+                        <p>مقیاس = فاصله روی نقشه ÷ فاصله واقعی</p>
+                        <p style="margin-top: 10px;"><strong>مثال:</strong></p>
+                        <p>۲cm روی نقشه = ۱۰۰m در واقعیت</p>
+                        <p>مقیاس = ۰.۰۲m ÷ ۱۰۰m = ۱/۵۰۰۰</p>
+                    </div>
+                    
+                    <div class="tip-box">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <p><strong>نکته:</strong> مقیاس‌های بزرگ (مثلاً ۱:۵۰۰) جزئیات بیشتری نشان می‌دهند، 
+                            در حالی که مقیاس‌های کوچک (مثلاً ۱:۵۰۰۰۰) منطقه بزرگتری را پوشش می‌دهند.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <button class="footer-btn" onclick="resetAll()">
+                    <i class="fas fa-redo"></i> ریست همه
+                </button>
+            </div>
+            <p class="copyright">© ۲۰۲۳ - ابزار کارتوگرافی - درس مبانی نقشه‌برداری</p>
+        </footer>
+    </div>
+
+    <script>
+        // تبدیل واحدها به متر
+        const unitToMeter = {
+            'mm': 0.001,
+            'cm': 0.01,
+            'm': 1,
+            'km': 1000,
+            'inch': 0.0254,
+            'feet': 0.3048
+        };
+
+        // مقیاس فعلی
+        let currentScale = 1000;
+
+        // تابع اصلی به‌روزرسانی مقیاس
+        function updateScale() {
+            const scaleValue = parseFloat(document.getElementById('scaleInput').value) || 1000;
+            currentScale = scaleValue;
+            
+            // به‌روزرسانی نمایش
+            updateDisplay();
+        }
+
+        // تنظیم مقیاس از دکمه‌ها
+        function setScale(scale) {
+            document.getElementById('scaleInput').value = scale;
+            currentScale = scale;
+            updateDisplay();
+        }
+
+        // محاسبه فاصله واقعی از فاصله نقشه
+        function calculateRealFromMap() {
+            const mapDistance = parseFloat(document.getElementById('mapDistance').value) || 5;
+            const mapUnit = document.getElementById('mapUnit').value;
+            
+            // تبدیل به متر
+            const mapInMeters = mapDistance * unitToMeter[mapUnit];
+            
+            // محاسبه فاصله واقعی
+            const realInMeters = mapInMeters * currentScale;
+            
+            // تبدیل به واحد انتخابی
+            const realUnit = document.getElementById('realUnit').value;
+            const realDistance = realInMeters / unitToMeter[realUnit];
+            
+            // به‌روزرسانی فیلد
+            document.getElementById('realDistance').value = realDistance.toFixed(2);
+            updateDisplay();
+        }
+
+        // محاسبه فاصله نقشه از فاصله واقعی
+        function calculateMapFromReal() {
+            const realDistance = parseFloat(document.getElementById('realDistance').value) || 50;
+            const realUnit = document.getElementById('realUnit').value;
+            
+            // تبدیل به متر
+            const realInMeters = realDistance * unitToMeter[realUnit];
+            
+            // محاسبه فاصله نقشه
+            const mapInMeters = realInMeters / currentScale;
+            
+            // تبدیل به واحد انتخابی
+            const mapUnit = document.getElementById('mapUnit').value;
+            const mapDistance = mapInMeters / unitToMeter[mapUnit];
+            
+            // به‌روزرسانی فیلد
+            document.getElementById('mapDistance').value = mapDistance.toFixed(2);
+            updateDisplay();
+        }
+
+        // به‌روزرسانی نمایش
+        function updateDisplay() {
+            const mapDistance = parseFloat(document.getElementById('mapDistance').value) || 5;
+            const mapUnit = document.getElementById('mapUnit').value;
+            const realDistance = parseFloat(document.getElementById('realDistance').value) || 50;
+            const realUnit = document.getElementById('realUnit').value;
+            
+            // محاسبه مقادیر برای نمایش
+            const mapInMeters = mapDistance * unitToMeter[mapUnit];
+            const realInMeters = realDistance * unitToMeter[realUnit];
+            
+            // به‌روزرسانی مقیاس
+            document.getElementById('displayScale').textContent = `۱:${formatNumber(currentScale)}`;
+            document.getElementById('displayVerbal').textContent = `۱ سانتیمتر = ${formatNumber(currentScale / 100)} متر`;
+            
+            // به‌روزرسانی فواصل
+            document.getElementById('displayRealDistance').textContent = 
+                `${formatNumber(realDistance)} ${getUnitName(realUnit)}`;
+            document.getElementById('displayMapDistance').textContent = 
+                `${formatNumber(mapDistance)} ${getUnitName(mapUnit)}`;
+        }
+
+        // ریست همه
+        function resetAll() {
+            document.getElementById('scaleInput').value = 1000;
+            document.getElementById('mapDistance').value = 5;
+            document.getElementById('realDistance').value = 50;
+            document.getElementById('mapUnit').value = 'cm';
+            document.getElementById('realUnit').value = 'm';
+            
+            currentScale = 1000;
+            updateDisplay();
+        }
+
+        // توابع کمکی
+        function formatNumber(num) {
+            return num.toLocaleString('fa-IR');
+        }
+
+        function getUnitName(unit) {
+            const names = {
+                'mm': 'میلی‌متر',
+                'cm': 'سانتیمتر',
+                'm': 'متر',
+                'km': 'کیلومتر',
+                'inch': 'اینچ',
+                'feet': 'فوت'
+            };
+            return names[unit] || unit;
+        }
+
+        // محاسبه خودکار با تغییر مقادیر
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('input', function() {
+                if (this.id === 'scaleInput') {
+                    updateScale();
+                } else if (this.id === 'mapDistance' || this.id === 'mapUnit') {
+                    calculateRealFromMap();
+                } else if (this.id === 'realDistance' || this.id === 'realUnit') {
+                    calculateMapFromReal();
+                }
+            });
+        });
+
+        // مقداردهی اولیه
+        window.onload = function() {
+            updateDisplay();
+        };
+    </script>
+</body>
+</html>

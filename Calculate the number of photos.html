@@ -1,0 +1,1041 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه تعداد عکس هوایی - ابزار کارتوگرافی</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+        }
+
+        /* تب‌ها */
+        .tabs-container {
+            padding: 0 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 10px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 10px 10px 0 0;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #495057;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .tab:hover {
+            background: #dee2e6;
+        }
+
+        .tab.active {
+            background: white;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            margin-bottom: -2px;
+        }
+
+        /* محتویات تب‌ها */
+        .tab-content {
+            padding: 30px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .tab-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        /* ورودی‌های مشترک */
+        .common-inputs {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 2px solid #ddd;
+        }
+
+        .common-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .common-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ورودی‌های اختصاصی هر تب */
+        .specific-inputs {
+            margin-top: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .input-with-unit {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-with-unit input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .input-with-unit input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .unit {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 100px;
+            text-align: center;
+            border: 2px solid #ddd;
+        }
+
+        .input-note {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* دکمه‌ها */
+        .calculate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .calculate-btn:hover {
+            background: linear-gradient(90deg, #27ae60, #219653);
+            transform: translateY(-2px);
+        }
+
+        /* نتایج */
+        .results-section {
+            margin-top: 30px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .result-card:nth-child(1) { border-color: #3498db; }
+        .result-card:nth-child(2) { border-color: #2ecc71; }
+        .result-card:nth-child(3) { border-color: #9b59b6; }
+        .result-card:nth-child(4) { border-color: #e74c3c; }
+        .result-card:nth-child(5) { border-color: #f39c12; }
+        .result-card:nth-child(6) { border-color: #1abc9c; }
+
+        .result-title {
+            color: #2c3e50;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 40px;
+        }
+
+        .result-value {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 8px 0;
+            direction: ltr;
+        }
+
+        .result-unit {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* اطلاعات پرواز */
+        .flight-info {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            border: 2px solid #3498db;
+        }
+
+        .flight-info h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        @media (max-width: 500px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .info-item h4 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .info-item p {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        /* انیمیشن‌ها */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card, .flight-info {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* نمایش پیشرفت */
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📸 محاسبه تعداد عکس هوایی</h1>
+            <p class="subtitle">سه ابزار کاربردی در یک برنامه - ورودی‌های ساده و نتایج دقیق</p>
+        </header>
+
+        <!-- تب‌ها -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(1)">
+                    📍 عکس در خط پرواز
+                </button>
+                <button class="tab" onclick="switchTab(2)">
+                    🛩️ خطوط پرواز
+                </button>
+                <button class="tab" onclick="switchTab(3)">
+                    📊 کل عکس برای مساحت
+                </button>
+            </div>
+        </div>
+
+        <!-- ورودی‌های مشترک -->
+        <div class="common-inputs" style="display: none;" id="commonInputs">
+            <h3 style="color: #2c3e50; margin-bottom: 15px; text-align: center;">📋 مشخصات مشترک عکس هوایی</h3>
+            <div class="common-grid">
+                <div class="input-group">
+                    <label>طول ضلع عکس:</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="commonPhotoSize" value="23" min="1" step="0.1">
+                        <div class="unit">سانتی‌متر</div>
+                    </div>
+                    <div class="input-note">معمولاً ۲۳ سانتی‌متر برای دوربین‌های هوایی</div>
+                </div>
+                
+                <div class="input-group">
+                    <label>مقیاس عکس:</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="commonScale" value="5000" min="1">
+                        <div class="unit">مقیاس (۱:XXX)</div>
+                    </div>
+                    <div class="input-note">مثلاً: ۱:۵۰۰۰، ۱:۲۵۰۰۰</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تب ۱: تعداد عکس در یک خط پرواز -->
+        <div class="tab-content active" id="tab1">
+            <h2 class="tab-title">📍 تعداد عکس در یک خط پرواز</h2>
+
+            <!-- ورودی‌های مشترک -->
+            <div class="common-inputs">
+                <h3 style="color: #2c3e50; margin-bottom: 15px; text-align: center;">📋 مشخصات عکس</h3>
+                <div class="common-grid">
+                    <div class="input-group">
+                        <label>طول ضلع عکس:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab1PhotoSize" value="23" min="1" step="0.1">
+                            <div class="unit">سانتی‌متر</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>مقیاس عکس:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab1Scale" value="5000" min="1">
+                            <div class="unit">مقیاس (۱:XXX)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ورودی‌های اختصاصی -->
+            <div class="specific-inputs">
+                <div class="common-grid">
+                    <div class="input-group">
+                        <label>درصد همپوشانی طولی:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab1LongOverlap" value="60" min="0" max="100" step="1">
+                            <div class="unit">درصد</div>
+                        </div>
+                        <div class="input-note">معمولاً ۶۰-۸۰٪ برای استریوسکوپی</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>طول خط پرواز:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab1FlightLength" value="10" min="0.1" step="0.1">
+                            <div class="unit">کیلومتر</div>
+                        </div>
+                        <div class="input-note">مسافتی که هواپیما طی می‌کند</div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateTab1()">
+                    <span style="font-size: 1.3rem;">📊</span> محاسبه تعداد عکس
+                </button>
+
+                <!-- نمایش پیشرفت -->
+                <div class="progress-bar" id="tab1ProgressBar" style="display: none;">
+                    <div class="progress-fill" id="tab1ProgressFill"></div>
+                </div>
+            </div>
+
+            <!-- نتایج -->
+            <div class="results-section">
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-title">تعداد عکس مورد نیاز</div>
+                        <div class="result-value" id="tab1PhotosCount">۰</div>
+                        <div class="result-unit">عدد</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-title">طول هر عکس روی زمین</div>
+                        <div class="result-value" id="tab1GroundLength">۰</div>
+                        <div class="result-unit">متر</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-title">پیشروی خالص</div>
+                        <div class="result-value" id="tab1NetAdvance">۰</div>
+                        <div class="result-unit">متر</div>
+                    </div>
+                </div>
+
+                <div class="flight-info">
+                    <h3>📈 اطلاعات خط پرواز</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <h4>همپوشانی روی زمین:</h4>
+                            <p id="tab1GroundOverlap">۰ متر</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <h4>فاصله بین مراکز:</h4>
+                            <p id="tab1CenterDistance">۰ متر</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <h4>عکس در هر کیلومتر:</h4>
+                            <p id="tab1PhotosPerKm">۰ عدد</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <h4>پوشش مؤثر:</h4>
+                            <p id="tab1EffectiveCoverage">۰٪</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تب ۲: تعداد خطوط پرواز -->
+        <div class="tab-content" id="tab2">
+            <h2 class="tab-title">🛩️ تعداد خطوط پرواز</h2>
+
+            <!-- ورودی‌های مشترک -->
+            <div class="common-inputs">
+                <h3 style="color: #2c3e50; margin-bottom: 15px; text-align: center;">📋 مشخصات عکس</h3>
+                <div class="common-grid">
+                    <div class="input-group">
+                        <label>طول ضلع عکس:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab2PhotoSize" value="23" min="1" step="0.1">
+                            <div class="unit">سانتی‌متر</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>مقیاس عکس:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab2Scale" value="5000" min="1">
+                            <div class="unit">مقیاس (۱:XXX)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ورودی‌های اختصاصی -->
+            <div class="specific-inputs">
+                <div class="common-grid">
+                    <div class="input-group">
+                        <label>درصد همپوشانی عرضی:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab2SideOverlap" value="30" min="0" max="100" step="1">
+                            <div class="unit">درصد</div>
+                        </div>
+                        <div class="input-note">معمولاً ۲۰-۴۰٪ برای پوشش کامل</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>عرض منطقه:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab2AreaWidth" value="5" min="0.1" step="0.1">
+                            <div class="unit">کیلومتر</div>
+                        </div>
+                        <div class="input-note">عرضی که باید پوشش داده شود</div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateTab2()">
+                    <span style="font-size: 1.3rem;">📊</span> محاسبه تعداد خطوط
+                </button>
+            </div>
+
+            <!-- نتایج -->
+            <div class="results-section">
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-title">تعداد خطوط پرواز</div>
+                        <div class="result-value" id="tab2FlightLines">۰</div>
+                        <div class="result-unit">خط</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-title">عرض هر عکس روی زمین</div>
+                        <div class="result-value" id="tab2GroundWidth">۰</div>
+                        <div class="result-unit">متر</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-title">فاصله بین خطوط</div>
+                        <div class="result-value" id="tab2LineDistance">۰</div>
+                        <div class="result-unit">متر</div>
+                    </div>
+                </div>
+
+                <div class="flight-info">
+                    <h3>🛩️ اطلاعات عرضی</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <h4>همپوشانی عرضی روی زمین:</h4>
+                            <p id="tab2GroundOverlap">۰ متر</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <h4>عرض کل پوشش:</h4>
+                            <p id="tab2TotalWidth">۰ متر</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <h4>خطوط در هر کیلومتر:</h4>
+                            <p id="tab2LinesPerKm">۰ خط</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <h4>انحراف مجاز:</h4>
+                            <p id="tab2Deviation">±۰ متر</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تب ۳: تعداد عکس برای پوشش مساحت -->
+        <div class="tab-content" id="tab3">
+            <h2 class="tab-title">📊 تعداد عکس برای پوشش مساحت</h2>
+
+            <!-- ورودی‌ها -->
+            <div class="specific-inputs">
+                <div class="common-grid">
+                    <div class="input-group">
+                        <label>طول ضلع عکس:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab3PhotoSize" value="23" min="1" step="0.1">
+                            <div class="unit">سانتی‌متر</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>مقیاس عکس:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab3Scale" value="5000" min="1">
+                            <div class="unit">مقیاس (۱:XXX)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>همپوشانی طولی:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab3LongOverlap" value="60" min="0" max="100" step="1">
+                            <div class="unit">درصد</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>همپوشانی عرضی:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab3SideOverlap" value="30" min="0" max="100" step="1">
+                            <div class="unit">درصد</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>طول منطقه:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab3AreaLength" value="10" min="0.1" step="0.1">
+                            <div class="unit">کیلومتر</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>عرض منطقه:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="tab3AreaWidth" value="5" min="0.1" step="0.1">
+                            <div class="unit">کیلومتر</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateTab3()">
+                    <span style="font-size: 1.3rem;">📊</span> محاسبه کل عکس‌ها
+                </button>
+            </div>
+
+            <!-- نتایج -->
+            <div class="results-section">
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-title">کل تعداد عکس</div>
+                        <div class="result-value" id="tab3TotalPhotos">۰</div>
+                        <div class="result-unit">عدد</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-title">عکس در هر خط</div>
+                        <div class="result-value" id="tab3PhotosPerLine">۰</div>
+                        <div class="result-unit">عدد</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-title">تعداد خطوط</div>
+                        <div class="result-value" id="tab3FlightLines">۰</div>
+                        <div class="result-unit">خط</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-title">مساحت منطقه</div>
+                        <div class="result-value" id="tab3AreaSize">۰</div>
+                        <div class="result-unit">کیلومتر مربع</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-title">مساحت هر عکس روی زمین</div>
+                        <div class="result-value" id="tab3PhotoArea">۰</div>
+                        <div class="result-unit">کیلومتر مربع</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="result-title">کارایی پرواز</div>
+                        <div class="result-value" id="tab3Efficiency">۰</div>
+                        <div class="result-unit">درصد</div>
+                    </div>
+                </div>
+
+                <div class="flight-info">
+                    <h3>📈 اطلاعات جامع پرواز</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <h4>تعداد کل عکس‌ها:</h4>
+                            <p id="tab3FinalPhotos">۰ عدد</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <h4>مساحت پوشش داده شده:</h4>
+                            <p id="tab3CoveredArea">۰ کیلومتر مربع</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <h4>مساحت مفید:</h4>
+                            <p id="tab3UsefulArea">۰ کیلومتر مربع</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <h4>عکس در هر کیلومتر مربع:</h4>
+                            <p id="tab3PhotosPerKm2">۰ عدد</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© ۲۰۲۳ - ابزار کارتوگرافی | برنامه محاسبه تعداد عکس هوایی</p>
+            <p style="margin-top: 5px; font-size: 0.8rem; color: #999;">
+                ورودی‌های ساده، محاسبات دقیق، نتایج کاربردی
+            </p>
+        </footer>
+    </div>
+
+    <!-- آیکون‌ها -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        // متغیرهای سراسری
+        let currentTab = 1;
+
+        // تابع تغییر تب
+        function switchTab(tabNumber) {
+            currentTab = tabNumber;
+            
+            // غیرفعال کردن همه تب‌ها
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // فعال کردن تب انتخاب شده
+            document.querySelectorAll('.tab')[tabNumber - 1].classList.add('active');
+            document.getElementById('tab' + tabNumber).classList.add('active');
+            
+            // پنهان کردن ورودی‌های مشترک
+            document.getElementById('commonInputs').style.display = 'none';
+        }
+
+        // تابع فرمت اعداد فارسی
+        function formatNumber(num) {
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return num.toString().replace(/\d/g, function(digit) {
+                return persianDigits[parseInt(digit)];
+            }).replace(/,/g, '،');
+        }
+
+        // تابع محاسبه طول روی زمین
+        function calculateGroundLength(photoSizeCm, scale) {
+            // تبدیل سانتی‌متر به متر: × 0.01
+            // ضرب در مقیاس
+            return (photoSizeCm * 0.01) * scale;
+        }
+
+        // ==================== تب ۱: تعداد عکس در یک خط پرواز ====================
+        function calculateTab1() {
+            // دریافت ورودی‌ها
+            const photoSize = parseFloat(document.getElementById('tab1PhotoSize').value) || 23;
+            const scale = parseFloat(document.getElementById('tab1Scale').value) || 5000;
+            const longOverlap = parseFloat(document.getElementById('tab1LongOverlap').value) || 60;
+            const flightLength = parseFloat(document.getElementById('tab1FlightLength').value) || 10;
+            
+            // محاسبات اصلی
+            const groundLength = calculateGroundLength(photoSize, scale); // متر
+            const longOverlapRatio = longOverlap / 100;
+            const groundOverlap = groundLength * longOverlapRatio; // همپوشانی روی زمین (متر)
+            const netAdvance = groundLength - groundOverlap; // پیشروی خالص (متر)
+            
+            // تعداد عکس (رند به بالا + ۱ برای عکس اول و آخر)
+            const photosCount = Math.ceil((flightLength * 1000) / netAdvance) + 1;
+            
+            // محاسبات جانبی
+            const centerDistance = netAdvance; // فاصله بین مراکز
+            const photosPerKm = photosCount / flightLength; // عکس در هر کیلومتر
+            const effectiveCoverage = ((flightLength * 1000) / (photosCount * groundLength)) * 100; // پوشش مؤثر
+            
+            // نمایش نتایج
+            document.getElementById('tab1PhotosCount').textContent = formatNumber(photosCount);
+            document.getElementById('tab1GroundLength').textContent = formatNumber(groundLength.toFixed(0));
+            document.getElementById('tab1NetAdvance').textContent = formatNumber(netAdvance.toFixed(0));
+            document.getElementById('tab1GroundOverlap').textContent = formatNumber(groundOverlap.toFixed(0)) + ' متر';
+            document.getElementById('tab1CenterDistance').textContent = formatNumber(centerDistance.toFixed(0)) + ' متر';
+            document.getElementById('tab1PhotosPerKm').textContent = formatNumber(photosPerKm.toFixed(1)) + ' عدد';
+            document.getElementById('tab1EffectiveCoverage').textContent = formatNumber(effectiveCoverage.toFixed(1)) + '٪';
+        }
+
+        // ==================== تب ۲: تعداد خطوط پرواز ====================
+        function calculateTab2() {
+            // دریافت ورودی‌ها
+            const photoSize = parseFloat(document.getElementById('tab2PhotoSize').value) || 23;
+            const scale = parseFloat(document.getElementById('tab2Scale').value) || 5000;
+            const sideOverlap = parseFloat(document.getElementById('tab2SideOverlap').value) || 30;
+            const areaWidth = parseFloat(document.getElementById('tab2AreaWidth').value) || 5;
+            
+            // محاسبات اصلی
+            const groundWidth = calculateGroundLength(photoSize, scale); // متر (در اینجا عرض)
+            const sideOverlapRatio = sideOverlap / 100;
+            const groundOverlap = groundWidth * sideOverlapRatio; // همپوشانی عرضی روی زمین (متر)
+            const lineDistance = groundWidth - groundOverlap; // فاصله بین خطوط (متر)
+            
+            // تعداد خطوط (رند به بالا + ۱ برای خط اول و آخر)
+            const flightLines = Math.ceil((areaWidth * 1000) / lineDistance) + 1;
+            
+            // محاسبات جانبی
+            const totalWidth = flightLines * lineDistance; // عرض کل پوشش
+            const linesPerKm = flightLines / areaWidth; // خطوط در هر کیلومتر
+            const deviation = (totalWidth - (areaWidth * 1000)) / 2; // انحراف مجاز
+            
+            // نمایش نتایج
+            document.getElementById('tab2FlightLines').textContent = formatNumber(flightLines);
+            document.getElementById('tab2GroundWidth').textContent = formatNumber(groundWidth.toFixed(0));
+            document.getElementById('tab2LineDistance').textContent = formatNumber(lineDistance.toFixed(0));
+            document.getElementById('tab2GroundOverlap').textContent = formatNumber(groundOverlap.toFixed(0)) + ' متر';
+            document.getElementById('tab2TotalWidth').textContent = formatNumber(totalWidth.toFixed(0)) + ' متر';
+            document.getElementById('tab2LinesPerKm').textContent = formatNumber(linesPerKm.toFixed(1)) + ' خط';
+            document.getElementById('tab2Deviation').textContent = '±' + formatNumber(Math.abs(deviation).toFixed(0)) + ' متر';
+        }
+
+        // ==================== تب ۳: تعداد عکس برای پوشش مساحت ====================
+        function calculateTab3() {
+                       // دریافت ورودی‌ها
+            const photoSize = parseFloat(document.getElementById('tab3PhotoSize').value) || 23;
+            const scale = parseFloat(document.getElementById('tab3Scale').value) || 5000;
+            const longOverlap = parseFloat(document.getElementById('tab3LongOverlap').value) || 60;
+            const sideOverlap = parseFloat(document.getElementById('tab3SideOverlap').value) || 30;
+            const areaLength = parseFloat(document.getElementById('tab3AreaLength').value) || 10;
+            const areaWidth = parseFloat(document.getElementById('tab3AreaWidth').value) || 5;
+            
+            // محاسبات طول روی زمین
+            const groundLength = calculateGroundLength(photoSize, scale); // متر
+            const groundWidth = groundLength; // مربع شکل
+            
+            // محاسبات همپوشانی
+            const longOverlapRatio = longOverlap / 100;
+            const sideOverlapRatio = sideOverlap / 100;
+            
+            const groundLongOverlap = groundLength * longOverlapRatio; // همپوشانی طولی
+            const groundSideOverlap = groundWidth * sideOverlapRatio; // همپوشانی عرضی
+            
+            // فاصله بین مراکز
+            const netAdvance = groundLength - groundLongOverlap; // فاصله بین عکس‌ها
+            const lineDistance = groundWidth - groundSideOverlap; // فاصله بین خطوط
+            
+            // محاسبه تعداد عکس و خطوط
+            const photosPerLine = Math.ceil((areaLength * 1000) / netAdvance) + 1;
+            const flightLines = Math.ceil((areaWidth * 1000) / lineDistance) + 1;
+            
+            // محاسبات کلی
+            const totalPhotos = photosPerLine * flightLines;
+            const areaSize = areaLength * areaWidth; // کیلومتر مربع
+            const photoAreaKm = (groundLength * groundWidth) / 1_000_000; // کیلومتر مربع
+            const totalCoveredArea = totalPhotos * photoAreaKm; // کل پوشش
+            const usefulArea = photosPerLine * flightLines * (netAdvance * lineDistance) / 1_000_000; // مساحت مفید
+            const efficiency = (areaSize / totalCoveredArea) * 100; // کارایی
+            const photosPerKm2 = totalPhotos / areaSize; // عکس در هر کیلومتر مربع
+            
+            // نمایش نتایج
+            document.getElementById('tab3TotalPhotos').textContent = formatNumber(totalPhotos);
+            document.getElementById('tab3PhotosPerLine').textContent = formatNumber(photosPerLine);
+            document.getElementById('tab3FlightLines').textContent = formatNumber(flightLines);
+            document.getElementById('tab3AreaSize').textContent = formatNumber(areaSize.toFixed(2));
+            document.getElementById('tab3PhotoArea').textContent = formatNumber(photoAreaKm.toFixed(4));
+            document.getElementById('tab3Efficiency').textContent = formatNumber(efficiency.toFixed(1));
+            document.getElementById('tab3FinalPhotos').textContent = formatNumber(totalPhotos) + ' عدد';
+            document.getElementById('tab3CoveredArea').textContent = formatNumber(totalCoveredArea.toFixed(2)) + ' کیلومتر مربع';
+            document.getElementById('tab3UsefulArea').textContent = formatNumber(usefulArea.toFixed(2)) + ' کیلومتر مربع';
+            document.getElementById('tab3PhotosPerKm2').textContent = formatNumber(photosPerKm2.toFixed(1)) + ' عدد';
+        }
+
+        // تابع همگام‌سازی ورودی‌های مشترک (اختیاری)
+        function syncCommonInputs() {
+            // اگر ورودی‌های مشترک فعال شوند
+            const commonPhotoSize = document.getElementById('commonPhotoSize').value;
+            const commonScale = document.getElementById('commonScale').value;
+            
+            // به همه تب‌ها کپی شود
+            ['tab1', 'tab2', 'tab3'].forEach(tab => {
+                document.getElementById(tab + 'PhotoSize').value = commonPhotoSize;
+                document.getElementById(tab + 'Scale').value = commonScale;
+            });
+        }
+
+        // ==================== توابع کمکی ====================
+        
+        // نمایش انیمیشن پیشرفت (نمونه برای تب 1)
+        function showProgressBar() {
+            const progressBar = document.getElementById('tab1ProgressBar');
+            const progressFill = document.getElementById('tab1ProgressFill');
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+            
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progressBar.style.display = 'none';
+                    }, 500);
+                } else {
+                    width += 10;
+                    progressFill.style.width = width + '%';
+                }
+            }, 50);
+        }
+
+        // بارگذاری اولیه
+        window.onload = function() {
+            // محاسبه خودکار با مقادیر پیش‌فرض
+            calculateTab1();
+            calculateTab2();
+            calculateTab3();
+            
+            // اضافه کردن رویداد تغییر به ورودی‌های تب 1
+            const tab1Inputs = document.querySelectorAll('#tab1 input');
+            tab1Inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    showProgressBar();
+                    setTimeout(calculateTab1, 600);
+                });
+            });
+            
+            // اضافه کردن رویداد تغییر به ورودی‌های تب 2
+            const tab2Inputs = document.querySelectorAll('#tab2 input');
+            tab2Inputs.forEach(input => {
+                input.addEventListener('input', calculateTab2);
+            });
+            
+            // اضافه کردن رویداد تغییر به ورودی‌های تب 3
+            const tab3Inputs = document.querySelectorAll('#tab3 input');
+            tab3Inputs.forEach(input => {
+                input.addEventListener('input', calculateTab3);
+            });
+            
+            // اضافه کردن جلوه‌های انیمیشن
+            const cards = document.querySelectorAll('.result-card, .flight-info');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = (index * 0.1) + 's';
+            });
+        };
+
+        // اضافه کردن جلوه‌های زیبا به دکمه‌ها
+        document.querySelectorAll('.calculate-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // ایجاد موج
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.7);
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    width: ${size}px;
+                    height: ${size}px;
+                    top: ${y}px;
+                    left: ${x}px;
+                `;
+                
+                this.appendChild(ripple);
+                
+                // حذف موج بعد از انیمیشن
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // اضافه کردن استایل برای موج
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+            
+            .calculate-btn {
+                position: relative;
+                overflow: hidden;
+            }
+            
+            /* رنگ‌های شیک برای نتایج */
+            .result-card:nth-child(1) { background: linear-gradient(135deg, #e3f2fd, #bbdefb); }
+            .result-card:nth-child(2) { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); }
+            .result-card:nth-child(3) { background: linear-gradient(135deg, #f3e5f5, #e1bee7); }
+            .result-card:nth-child(4) { background: linear-gradient(135deg, #fff3e0, #ffecb3); }
+            .result-card:nth-child(5) { background: linear-gradient(135deg, #f1f8e9, #dcedc8); }
+            .result-card:nth-child(6) { background: linear-gradient(135deg, #e0f2f1, #b2dfdb); }
+            
+            /* انیمیشن برای ورودی‌ها */
+            input:focus {
+                transform: translateY(-1px);
+                transition: all 0.2s;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

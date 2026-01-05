@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css">
+    <title>محاسبه همپوشانی عرضی عکس هوایی</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, #8e44ad, #9b59b6);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        /* ورودی‌ها */
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .unit {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 100px;
+            text-align: center;
+            border: 2px solid #ddd;
+        }
+
+        /* دکمه */
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .calculate-btn:hover {
+            background: #8e44ad;
+            transform: translateY(-2px);
+        }
+
+        /* نتایج */
+        .results {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #9b59b6;
+        }
+
+        .result-item {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #9b59b6;
+        }
+
+        .result-label {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .result-value {
+            color: #2c3e50;
+            font-size: 1.6rem;
+            font-weight: bold;
+        }
+
+        .result-sub {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* توضیحات */
+        .explanation {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            border: 2px solid #64b5f6;
+        }
+
+        .explanation h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .explanation p {
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+
+        /* انیمیشن */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-item {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>محاسبه همپوشانی عرضی</h1>
+            <p class="subtitle">عکس هوایی - محاسبه همپوشانی بین خطوط پرواز</p>
+        </header>
+
+        <div class="main-content">
+            <!-- ورودی‌ها -->
+            <div class="input-group">
+                <div class="input-row">
+                    <input type="number" id="photoWidth" value="23" placeholder="مثلاً ۲۳">
+                    <div class="unit">سانتی‌متر عرض عکس</div>
+                </div>
+                
+                <div class="input-row">
+                    <input type="number" id="scale" value="70000" placeholder="مثلاً ۷۰۰۰۰">
+                    <div class="unit">مقیاس (۱:XXX)</div>
+                </div>
+                
+                <div class="input-row">
+                    <input type="number" id="overlapPercent" value="30" placeholder="مثلاً ۳۰">
+                    <div class="unit">درصد همپوشانی عرضی</div>
+                </div>
+            </div>
+
+            <button class="calculate-btn" onclick="calculate()">
+                محاسبه همپوشانی عرضی
+            </button>
+
+            <!-- نتایج -->
+            <div class="results">
+                <div class="result-item">
+                    <div class="result-label">همپوشانی عرضی روی عکس</div>
+                    <div class="result-value" id="resultPhotoOverlap">۰ سانتی‌متر</div>
+                    <div class="result-sub">قسمت تکرار شده بین دو خط پرواز</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">همپوشانی عرضی روی زمین</div>
+                    <div class="result-value" id="resultGroundOverlap">۰ متر</div>
+                    <div class="result-sub">قسمت تکرار شده روی زمین بین خطوط</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">فاصله بین خطوط پرواز</div>
+                    <div class="result-value" id="resultFlightLineDistance">۰ متر</div>
+                    <div class="result-sub">فاصله مرکز تا مرکز خطوط پرواز</div>
+                </div>
+            </div>
+
+            <!-- توضیحات -->
+            <div class="explanation">
+                <h3>📐 همپوشانی عرضی چیست؟</h3>
+                <p><strong>همپوشانی عرضی (Side Overlap)</strong> درصد پوشش مشترک بین عکس‌های دو خط پرواز مجاور است.</p>
+                <p>🔹 <strong>معمولاً ۲۰-۴۰٪</strong> در نظر گرفته می‌شود</p>
+                <p>🔹 برای <strong>پوشش کامل منطقه</strong> ضروری است</p>
+                <p>🔹 از <strong>ایجاد شکاف</strong> بین خطوط پرواز جلوگیری می‌کند</p>
+            </div>
+        </div>
+
+        <footer>
+            ابزار کارتوگرافی - همپوشانی عرضی
+        </footer>
+    </div>
+
+    <script>
+        function calculate() {
+            // ۱. گرفتن ورودی‌ها
+            const photoWidth = parseFloat(document.getElementById('photoWidth').value) || 23; // سانتی‌متر
+            const scale = parseFloat(document.getElementById('scale').value) || 70000; // مثلاً ۱:۷۰۰۰۰
+            const overlapPercent = parseFloat(document.getElementById('overlapPercent').value) || 30; // درصد
+            
+            // ۲. تبدیل به مقادیر اعشاری
+            const overlapDecimal = overlapPercent / 100;
+            
+            // ۳. محاسبه عرض عکس روی زمین (سانتی‌متر → متر)
+            // فرمول: عرض روی زمین = عرض عکس × مقیاس
+            const groundWidth = (photoWidth * scale) / 100; // تقسیم بر ۱۰۰ برای تبدیل سانتی‌متر به متر
+            
+            // ۴. محاسبات اصلی
+            const photoOverlap = photoWidth * overlapDecimal; // همپوشانی روی عکس (سانتی‌متر)
+            const groundOverlap = groundWidth * overlapDecimal; // همپوشانی روی زمین (متر)
+            const flightLineDistance = groundWidth - groundOverlap; // فاصله بین خطوط پرواز (متر)
+            
+            // ۵. نمایش نتایج
+            document.getElementById('resultPhotoOverlap').textContent = 
+                photoOverlap.toFixed(2) + ' سانتی‌متر';
+            
+            document.getElementById('resultGroundOverlap').textContent = 
+                groundOverlap.toFixed(0) + ' متر';
+            
+            document.getElementById('resultFlightLineDistance').textContent = 
+                flightLineDistance.toFixed(0) + ' متر';
+        }
+
+        // محاسبه خودکار با تغییر هر فیلد
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', calculate);
+        });
+
+        // محاسبه اولیه
+        window.onload = calculate;
+    </script>
+</body>
+</html>

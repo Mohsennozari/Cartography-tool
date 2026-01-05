@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css">
+    <title>محاسبه همپوشانی طولی عکس هوایی</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+           font-family: 'Vazir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        /* ورودی‌ها */
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .unit {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 100px;
+            text-align: center;
+            border: 2px solid #ddd;
+        }
+
+        /* دکمه */
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .calculate-btn:hover {
+            background: #27ae60;
+        }
+
+        /* نتایج */
+        .results {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #3498db;
+        }
+
+        .result-item {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .result-label {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .result-value {
+            color: #2c3e50;
+            font-size: 1.6rem;
+            font-weight: bold;
+        }
+
+        .result-sub {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+
+        /* انیمیشن ساده */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-item {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>محاسبه همپوشانی طولی</h1>
+            <p class="subtitle">عکس هوایی - محاسبات ساده و مستقیم</p>
+        </header>
+
+        <div class="main-content">
+            <!-- ورودی‌ها -->
+            <div class="input-group">
+                <div class="input-row">
+                    <input type="number" id="photoSize" value="23" placeholder="مثلاً ۲۳">
+                    <div class="unit">سانتی‌متر عکس</div>
+                </div>
+                
+                <div class="input-row">
+                    <input type="number" id="scale" value="70000" placeholder="مثلاً ۷۰۰۰۰">
+                    <div class="unit">مقیاس (۱:XXX)</div>
+                </div>
+                
+                <div class="input-row">
+                    <input type="number" id="overlapPercent" value="60" placeholder="مثلاً ۶۰">
+                    <div class="unit">درصد همپوشانی</div>
+                </div>
+            </div>
+
+            <button class="calculate-btn" onclick="calculate()">
+                محاسبه همپوشانی
+            </button>
+
+            <!-- نتایج -->
+            <div class="results">
+                <div class="result-item">
+                    <div class="result-label">همپوشانی روی عکس</div>
+                    <div class="result-value" id="resultPhotoOverlap">۰ سانتی‌متر</div>
+                    <div class="result-sub">قسمت تکرار شده در عکس بعدی</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">همپوشانی روی زمین</div>
+                    <div class="result-value" id="resultGroundOverlap">۰ متر</div>
+                    <div class="result-sub">قسمت تکرار شده روی زمین</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">پیشروی خالص</div>
+                    <div class="result-value" id="resultNetAdvance">۰ متر</div>
+                    <div class="result-sub">زمین جدید پوشش داده شده</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            ابزار کارتوگرافی - همپوشانی طولی
+        </footer>
+    </div>
+
+    <script>
+        function calculate() {
+            // ۱. گرفتن ورودی‌ها
+            const photoSize = parseFloat(document.getElementById('photoSize').value) || 23; // سانتی‌متر
+            const scale = parseFloat(document.getElementById('scale').value) || 70000; // مثلاً ۱:۷۰۰۰۰
+            const overlapPercent = parseFloat(document.getElementById('overlapPercent').value) || 60; // درصد
+            
+            // ۲. تبدیل به مقادیر اعشاری
+            const overlapDecimal = overlapPercent / 100;
+            
+            // ۳. محاسبه طول عکس روی زمین (سانتی‌متر → متر)
+            // فرمول: طول روی زمین = طول عکس × مقیاس
+            const groundLength = (photoSize * scale) / 100; // تقسیم بر ۱۰۰ برای تبدیل سانتی‌متر به متر
+            
+            // ۴. محاسبات اصلی
+            const photoOverlap = photoSize * overlapDecimal; // همپوشانی روی عکس (سانتی‌متر)
+            const groundOverlap = groundLength * overlapDecimal; // همپوشانی روی زمین (متر)
+            const netAdvance = groundLength - groundOverlap; // پیشروی خالص (متر)
+            
+            // ۵. نمایش نتایج
+            document.getElementById('resultPhotoOverlap').textContent = 
+                photoOverlap.toFixed(2) + ' سانتی‌متر';
+            
+            document.getElementById('resultGroundOverlap').textContent = 
+                groundOverlap.toFixed(0) + ' متر';
+            
+            document.getElementById('resultNetAdvance').textContent = 
+                netAdvance.toFixed(0) + ' متر';
+        }
+
+        // محاسبه خودکار با تغییر هر فیلد
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', calculate);
+        });
+
+        // محاسبه اولیه
+        window.onload = calculate;
+    </script>
+</body>
+</html>

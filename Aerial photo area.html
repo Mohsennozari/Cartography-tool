@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه مساحت از عکس هوایی - ابزار کارتوگرافی</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css">
+    <style>
+        /* استایل اصلی */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* هدر */
+        header {
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: #ecf0f1;
+        }
+
+        /* محتوای اصلی */
+        .main-content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* بخش ورودی */
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .input-with-unit {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-with-unit input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-with-unit input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .input-with-unit select {
+            padding: 12px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            background: white;
+            min-width: 100px;
+            cursor: pointer;
+        }
+
+        .scale-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .scale-input span {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .scale-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        /* دکمه محاسبه */
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .calculate-btn:hover {
+            background: linear-gradient(90deg, #2980b9, #1c6ea4);
+            transform: translateY(-2px);
+        }
+
+        /* بخش نتایج */
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .main-result {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .main-result h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .area-value {
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .area-unit {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+
+        .result-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .result-card .value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .unit-converter {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .unit-converter h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .units-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .unit-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .unit-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .unit-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* فوتر */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-top: 1px solid #34495e;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .footer-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .footer-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .copyright {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        /* انیمیشن‌های ساده */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-section > * {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-satellite"></i> محاسبه مساحت از عکس هوایی</h1>
+            <p class="subtitle">تبدیل ابعاد عکس به مساحت واقعی زمین</p>
+        </header>
+
+        <div class="main-content">
+            <!-- بخش ورودی -->
+            <section class="input-section">
+                <div class="input-group">
+                    <label><i class="fas fa-arrows-alt-h"></i> عرض عکس:</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="photoWidth" value="30" min="1" step="0.1">
+                        <select id="widthUnit">
+                            <option value="cm">سانتی‌متر</option>
+                            <option value="inch">اینچ</option>
+                            <option value="mm">میلی‌متر</option>
+                            <option value="pixel">پیکسل</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-arrows-alt-v"></i> ارتفاع عکس:</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="photoHeight" value="30" min="1" step="0.1">
+                        <select id="heightUnit">
+                            <option value="cm">سانتی‌متر</option>
+                            <option value="inch">اینچ</option>
+                            <option value="mm">میلی‌متر</option>
+                            <option value="pixel">پیکسل</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-ruler-combined"></i> مقیاس عکس:</label>
+                    <div class="scale-input">
+                        <span>۱:</span>
+                        <input type="number" id="scale" value="5000" min="1">
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateArea()">
+                    <i class="fas fa-calculator"></i> محاسبه مساحت
+                </button>
+            </section>
+
+            <!-- بخش نتایج -->
+            <section class="results-section">
+                <div class="main-result">
+                    <h3>مساحت واقعی زمین</h3>
+                    <div class="area-value" id="realArea">۰</div>
+                    <div class="area-unit" id="realAreaUnit">کیلومتر مربع</div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h4>عرض واقعی</h4>
+                        <div class="value" id="realWidth">۰ متر</div>
+                    </div>
+                    <div class="result-card">
+                        <h4>ارتفاع واقعی</h4>
+                        <div class="value" id="realHeight">۰ متر</div>
+                    </div>
+                    <div class="result-card">
+                        <h4>مساحت عکس</h4>
+                        <div class="value" id="photoArea">۰ سانتی‌متر مربع</div>
+                    </div>
+                    <div class="result-card">
+                        <h4>مقیاس</h4>
+                        <div class="value" id="scaleDisplay">۱:۵۰۰۰</div>
+                    </div>
+                </div>
+
+                <div class="unit-converter">
+                    <h3><i class="fas fa-exchange-alt"></i> تبدیل واحد مساحت</h3>
+                    <div class="units-grid">
+                        <div class="unit-box">
+                            <div class="unit-value" id="areaKm2">۰</div>
+                            <div class="unit-label">کیلومتر مربع</div>
+                        </div>
+                        <div class="unit-box">
+                            <div class="unit-value" id="areaM2">۰</div>
+                            <div class="unit-label">متر مربع</div>
+                        </div>
+                        <div class="unit-box">
+                            <div class="unit-value" id="areaHectare">۰</div>
+                            <div class="unit-label">هکتار</div>
+                        </div>
+                        <div class="unit-box">
+                            <div class="unit-value" id="areaAcre">۰</div>
+                            <div class="unit-label">جریب</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <button class="footer-btn" onclick="resetCalculator()">
+                    <i class="fas fa-redo"></i> ریست
+                </button>
+                <button class="footer-btn" onclick="printResults()">
+                    <i class="fas fa-print"></i> چاپ
+                </button>
+            </div>
+            <p class="copyright">© ۲۰۲۳ - ابزار کارتوگرافی - درس مبانی نقشه‌برداری</p>
+        </footer>
+    </div>
+
+    <script>
+        // ثابت‌های تبدیل واحد
+        const UNIT_TO_METER = {
+            'cm': 0.01,
+            'mm': 0.001,
+            'inch': 0.0254,
+            'pixel': 0.0254 / 300 // فرض DPI=300
+        };
+
+        const AREA_CONVERSION = {
+            'km²': 0.000001,
+            'm²': 1,
+            'hectare': 0.0001,
+            'acre': 0.000247105
+        };
+
+        // تابع اصلی محاسبه - بدون اعتبارسنجی احمقانه
+        function calculateArea() {
+            // دریافت مقادیر
+            const width = parseFloat(document.getElementById('photoWidth').value) || 30;
+            const height = parseFloat(document.getElementById('photoHeight').value) || 30;
+            const widthUnit = document.getElementById('widthUnit').value;
+            const heightUnit = document.getElementById('heightUnit').value;
+            const scale = parseFloat(document.getElementById('scale').value) || 5000;
+
+            // تبدیل ابعاد به متر
+            const widthInMeters = width * (UNIT_TO_METER[widthUnit] || 0.01);
+            const heightInMeters = height * (UNIT_TO_METER[heightUnit] || 0.01);
+
+            // محاسبه ابعاد واقعی
+            const realWidth = widthInMeters * scale;
+            const realHeight = heightInMeters * scale;
+
+            // محاسبه مساحت
+            const realAreaM2 = realWidth * realHeight;
+            const photoAreaCm2 = (widthInMeters * heightInMeters * 10000).toFixed(2);
+
+            // نمایش نتایج
+            updateDisplay(realWidth, realHeight, realAreaM2, photoAreaCm2, scale);
+        }
+
+        // نمایش نتایج
+        function updateDisplay(realWidth, realHeight, realAreaM2, photoAreaCm2, scale) {
+            // ابعاد واقعی
+            document.getElementById('realWidth').textContent = formatDistance(realWidth) + ' متر';
+            document.getElementById('realHeight').textContent = formatDistance(realHeight) + ' متر';
+            
+            // مساحت عکس
+            document.getElementById('photoArea').textContent = photoAreaCm2 + ' سانتی‌متر مربع';
+            
+            // مقیاس
+            document.getElementById('scaleDisplay').textContent = `۱:${formatNumber(scale)}`;
+            
+            // مساحت واقعی
+            const areaKm2 = realAreaM2 * AREA_CONVERSION['km²'];
+            document.getElementById('realArea').textContent = formatNumber(areaKm2, 4);
+            document.getElementById('realAreaUnit').textContent = 'کیلومتر مربع';
+            
+            // تبدیل واحدهای مختلف
+            document.getElementById('areaKm2').textContent = formatNumber(areaKm2, 4);
+            document.getElementById('areaM2').textContent = formatNumber(realAreaM2, 2);
+            document.getElementById('areaHectare').textContent = formatNumber(realAreaM2 * AREA_CONVERSION['hectare'], 4);
+            document.getElementById('areaAcre').textContent = formatNumber(realAreaM2 * AREA_CONVERSION['acre'], 4);
+        }
+
+        // ریست
+        function resetCalculator() {
+            document.getElementById('photoWidth').value = 30;
+            document.getElementById('photoHeight').value = 30;
+            document.getElementById('widthUnit').value = 'cm';
+            document.getElementById('heightUnit').value = 'cm';
+            document.getElementById('scale').value = 5000;
+            calculateArea();
+        }
+
+        // چاپ - فقط در صورت نیاز
+        function printResults() {
+            window.print();
+        }
+
+        // توابع کمکی
+        function formatNumber(num, decimals = 2) {
+            if (isNaN(num)) return '۰';
+            return num.toLocaleString('fa-IR', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
+        function formatDistance(meters) {
+            if (meters >= 1000) {
+                return `${formatNumber(meters / 1000, 2)} کیلومتر`;
+            }
+            return `${formatNumber(meters, 2)} متر`;
+        }
+
+        // تغییر خودکار واحد ارتفاع با واحد عرض
+        document.getElementById('widthUnit').addEventListener('change', function() {
+            document.getElementById('heightUnit').value = this.value;
+        });
+
+        // محاسبه خودکار با هر تغییر
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('input', calculateArea);
+        });
+
+        // محاسبه اولیه
+        window.onload = calculateArea;
+    </script>
+</body>
+</html>

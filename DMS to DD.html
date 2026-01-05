@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مبدل مختصات جغرافیایی - DMS به DD</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .tabs {
+            display: flex;
+            background-color: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 18px 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #475569;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+        
+        .tab.active {
+            background-color: white;
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .converter-box {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .input-section, .output-section {
+            background-color: #f8fafc;
+            border-radius: 10px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2 i {
+            color: #3498db;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-field {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #475569;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .direction-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #64748b;
+            margin: 10px 0;
+        }
+        
+        .btn-convert {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-convert:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .result {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            text-align: center;
+            color: #0369a1;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .explanation {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: 10px;
+            border-right: 4px solid #3498db;
+        }
+        
+        .explanation h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .explanation p {
+            color: #475569;
+            line-height: 1.8;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .input-field {
+                min-width: 100%;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-globe-americas"></i> مبدل مختصات جغرافیایی</h1>
+            <p class="subtitle">تبدیل درجه، دقیقه، ثانیه (DMS) به درجه اعشاری (DD) و بالعکس</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="tab1">طول جغرافیایی: DMS به DD</div>
+            <div class="tab" data-tab="tab2">عرض جغرافیایی: DMS به DD</div>
+            <div class="tab" data-tab="tab3">طول جغرافیایی: DD به DMS</div>
+            <div class="tab" data-tab="tab4">عرض جغرافیایی: DD به DMS</div>
+        </div>
+        
+        <!-- Tab 1: Longitude DMS to DD -->
+        <div id="tab1" class="tab-content active">
+            <div class="converter-box">
+                <div class="input-section">
+                    <h2><i class="fas fa-long-arrow-alt-right"></i> تبدیل طول جغرافیایی از DMS به DD</h2>
+                    <p>مقادیر درجه، دقیقه و ثانیه طول جغرافیایی را وارد کنید (بین ۰° تا ۱۸۰° شرقی یا غربی)</p>
+                    
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="long-dms-degree">درجه (°)</label>
+                            <input type="number" id="long-dms-degree" min="0" max="180" placeholder="مثال: 45" step="1">
+                        </div>
+                        <div class="input-field">
+                            <label for="long-dms-minute">دقیقه (')</label>
+                            <input type="number" id="long-dms-minute" min="0" max="59" placeholder="مثال: 30" step="1">
+                        </div>
+                        <div class="input-field">
+                            <label for="long-dms-second">ثانیه (")</label>
+                            <input type="number" id="long-dms-second" min="0" max="59.999" placeholder="مثال: 15.5" step="0.001">
+                        </div>
+                        <div class="input-field">
+                            <label for="long-dms-direction">جهت</label>
+                            <select id="long-dms-direction" style="padding: 14px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1;">
+                                <option value="E">شرقی (E)</option>
+                                <option value="W">غربی (W)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-convert" id="convert-long-dms-to-dd">
+                        <i class="fas fa-exchange-alt"></i> تبدیل به درجه اعشاری
+                    </button>
+                </div>
+                
+                <div class="direction-indicator">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                
+                <div class="output-section">
+                    <h2><i class="fas fa-map-marked-alt"></i> نتیجه تبدیل</h2>
+                    <div id="long-dms-to-dd-result" class="result"></div>
+                    <p>نتیجه به صورت درجه اعشاری نمایش داده می‌شود. مقادیر شرقی مثبت و غربی منفی در نظر گرفته می‌شوند.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 2: Latitude DMS to DD -->
+        <div id="tab2" class="tab-content">
+            <div class="converter-box">
+                <div class="input-section">
+                    <h2><i class="fas fa-long-arrow-alt-right"></i> تبدیل عرض جغرافیایی از DMS به DD</h2>
+                    <p>مقادیر درجه، دقیقه و ثانیه عرض جغرافیایی را وارد کنید (بین ۰° تا ۹۰° شمالی یا جنوبی)</p>
+                    
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="lat-dms-degree">درجه (°)</label>
+                            <input type="number" id="lat-dms-degree" min="0" max="90" placeholder="مثال: 30" step="1">
+                        </div>
+                        <div class="input-field">
+                            <label for="lat-dms-minute">دقیقه (')</label>
+                            <input type="number" id="lat-dms-minute" min="0" max="59" placeholder="مثال: 15" step="1">
+                        </div>
+                        <div class="input-field">
+                            <label for="lat-dms-second">ثانیه (")</label>
+                            <input type="number" id="lat-dms-second" min="0" max="59.999" placeholder="مثال: 45.2" step="0.001">
+                        </div>
+                        <div class="input-field">
+                            <label for="lat-dms-direction">جهت</label>
+                            <select id="lat-dms-direction" style="padding: 14px; width: 100%; border-radius: 8px; border: 1px solid #cbd5e1;">
+                                <option value="N">شمالی (N)</option>
+                                <option value="S">جنوبی (S)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-convert" id="convert-lat-dms-to-dd">
+                        <i class="fas fa-exchange-alt"></i> تبدیل به درجه اعشاری
+                    </button>
+                </div>
+                
+                <div class="direction-indicator">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                
+                <div class="output-section">
+                    <h2><i class="fas fa-map-marked-alt"></i> نتیجه تبدیل</h2>
+                    <div id="lat-dms-to-dd-result" class="result"></div>
+                    <p>نتیجه به صورت درجه اعشاری نمایش داده می‌شود. مقادیر شمالی مثبت و جنوبی منفی در نظر گرفته می‌شوند.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 3: Longitude DD to DMS -->
+        <div id="tab3" class="tab-content">
+            <div class="converter-box">
+                <div class="input-section">
+                    <h2><i class="fas fa-long-arrow-alt-right"></i> تبدیل طول جغرافیایی از DD به DMS</h2>
+                    <p>مقدار درجه اعشاری طول جغرافیایی را وارد کنید (بین ۱۸۰°- تا ۱۸۰°+)</p>
+                    
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="long-dd">درجه اعشاری طول جغرافیایی</label>
+                            <input type="number" id="long-dd" min="-180" max="180" step="0.000001" placeholder="مثال: 45.504166">
+                        </div>
+                    </div>
+                    
+                    <button class="btn-convert" id="convert-long-dd-to-dms">
+                        <i class="fas fa-exchange-alt"></i> تبدیل به درجه، دقیقه، ثانیه
+                    </button>
+                </div>
+                
+                <div class="direction-indicator">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                
+                <div class="output-section">
+                    <h2><i class="fas fa-map-marked-alt"></i> نتیجه تبدیل</h2>
+                    <div id="long-dd-to-dms-result" class="result"></div>
+                    <p>نتیجه به صورت درجه، دقیقه، ثانیه و جهت نمایش داده می‌شود.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 4: Latitude DD to DMS -->
+        <div id="tab4" class="tab-content">
+            <div class="converter-box">
+                <div class="input-section">
+                    <h2><i class="fas fa-long-arrow-alt-right"></i> تبدیل عرض جغرافیایی از DD به DMS</h2>
+                    <p>مقدار درجه اعشاری عرض جغرافیایی را وارد کنید (بین ۹۰°- تا ۹۰°+)</p>
+                    
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="lat-dd">درجه اعشاری عرض جغرافیایی</label>
+                            <input type="number" id="lat-dd" min="-90" max="90" step="0.000001" placeholder="مثال: 30.2625">
+                        </div>
+                    </div>
+                    
+                    <button class="btn-convert" id="convert-lat-dd-to-dms">
+                        <i class="fas fa-exchange-alt"></i> تبدیل به درجه، دقیقه، ثانیه
+                    </button>
+                </div>
+                
+                <div class="direction-indicator">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                
+                <div class="output-section">
+                    <h2><i class="fas fa-map-marked-alt"></i> نتیجه تبدیل</h2>
+                    <div id="lat-dd-to-dms-result" class="result"></div>
+                    <p>نتیجه به صورت درجه، دقیقه، ثانیه و جهت نمایش داده می‌شود.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="explanation">
+            <h3><i class="fas fa-info-circle"></i> راهنمای تبدیل مختصات</h3>
+            <p>
+                <strong>DMS (درجه، دقیقه، ثانیه):</strong> فرمت سنتی نمایش مختصات جغرافیایی که یک مکان را با درجه (°)، دقیقه (') و ثانیه (") نشان می‌دهد.
+            </p>
+            <p>
+                <strong>DD (درجه اعشاری):</strong> فرمت مدرن نمایش مختصات جغرافیایی که موقعیت را به صورت یک عدد اعشاری نشان می‌دهد.
+            </p>
+            <p>
+                <strong>تبدیل DMS به DD:</strong> DD = درجه + (دقیقه/60) + (ثانیه/3600)
+            </p>
+            <p>
+                <strong>تبدیل DD به DMS:</strong> درجه = قسمت صحیح عدد | دقیقه = قسمت صحیح ((عدد - درجه) × 60) | ثانیه = باقیمانده × 60
+            </p>
+        </div>
+        
+        <footer>
+            <p>© 2023 مبدل مختصات جغرافیایی | طراحی شده با سبک مینیمالیسم مدرن</p>
+        </footer>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Conversion functions
+        function dmsToDD(degrees, minutes, seconds, direction) {
+            let dd = degrees + (minutes / 60) + (seconds / 3600);
+            
+            if (direction === 'S' || direction === 'W') {
+                dd = -dd;
+            }
+            
+            return dd;
+        }
+        
+        function ddToDMS(dd) {
+            const absDD = Math.abs(dd);
+            const degrees = Math.floor(absDD);
+            const minutesFloat = (absDD - degrees) * 60;
+            const minutes = Math.floor(minutesFloat);
+            const seconds = (minutesFloat - minutes) * 60;
+            
+            return { degrees, minutes, seconds };
+        }
+        
+        function getDirectionFromDD(dd, isLatitude) {
+            if (isLatitude) {
+                return dd >= 0 ? 'N' : 'S';
+            } else {
+                return dd >= 0 ? 'E' : 'W';
+            }
+        }
+        
+        // Event listeners for conversions
+        document.getElementById('convert-long-dms-to-dd').addEventListener('click', function() {
+            const degrees = parseFloat(document.getElementById('long-dms-degree').value) || 0;
+            const minutes = parseFloat(document.getElementById('long-dms-minute').value) || 0;
+            const seconds = parseFloat(document.getElementById('long-dms-second').value) || 0;
+            const direction = document.getElementById('long-dms-direction').value;
+            
+            // Validation
+            if (degrees < 0 || degrees > 180) {
+                alert('درجه طول جغرافیایی باید بین 0 و 180 باشد');
+                return;
+            }
+            
+            if (minutes < 0 || minutes >= 60) {
+                alert('دقیقه باید بین 0 و 59 باشد');
+                return;
+            }
+            
+            if (seconds < 0 || seconds >= 60) {
+                alert('ثانیه باید بین 0 و 59.999 باشد');
+                return;
+            }
+            
+            const dd = dmsToDD(degrees, minutes, seconds, direction);
+            const resultElement = document.getElementById('long-dms-to-dd-result');
+            resultElement.textContent = `${dd.toFixed(6)}°`;
+            resultElement.classList.add('show');
+        });
+        
+        document.getElementById('convert-lat-dms-to-dd').addEventListener('click', function() {
+            const degrees = parseFloat(document.getElementById('lat-dms-degree').value) || 0;
+            const minutes = parseFloat(document.getElementById('lat-dms-minute').value) || 0;
+            const seconds = parseFloat(document.getElementById('lat-dms-second').value) || 0;
+            const direction = document.getElementById('lat-dms-direction').value;
+            
+            // Validation
+            if (degrees < 0 || degrees > 90) {
+                alert('درجه عرض جغرافیایی باید بین 0 و 90 باشد');
+                return;
+            }
+            
+            if (minutes < 0 || minutes >= 60) {
+                alert('دقیقه باید بین 0 و 59 باشد');
+                return;
+            }
+            
+            if (seconds < 0 || seconds >= 60) {
+                alert('ثانیه باید بین 0 و 59.999 باشد');
+                return;
+            }
+            
+            const dd = dmsToDD(degrees, minutes, seconds, direction);
+            const resultElement = document.getElementById('lat-dms-to-dd-result');
+            resultElement.textContent = `${dd.toFixed(6)}°`;
+            resultElement.classList.add('show');
+        });
+        
+        document.getElementById('convert-long-dd-to-dms').addEventListener('click', function() {
+            const dd = parseFloat(document.getElementById('long-dd').value);
+            
+            // Validation
+            if (isNaN(dd) || dd < -180 || dd > 180) {
+                alert('طول جغرافیایی باید بین ۱۸۰- و ۱۸۰+ باشد');
+                return;
+            }
+            
+            const dms = ddToDMS(dd);
+            const direction = getDirectionFromDD(dd, false);
+            const resultElement = document.getElementById('long-dd-to-dms-result');
+            resultElement.textContent = `${dms.degrees}° ${dms.minutes}' ${dms.seconds.toFixed(3)}" ${direction}`;
+            resultElement.classList.add('show');
+        });
+        
+        document.getElementById('convert-lat-dd-to-dms').addEventListener('click', function() {
+            const dd = parseFloat(document.getElementById('lat-dd').value);
+            
+            // Validation
+            if (isNaN(dd) || dd < -90 || dd > 90) {
+                alert('عرض جغرافیایی باید بین ۹۰- و ۹۰+ باشد');
+                return;
+            }
+            
+            const dms = ddToDMS(dd);
+            const direction = getDirectionFromDD(dd, true);
+            const resultElement = document.getElementById('lat-dd-to-dms-result');
+            resultElement.textContent = `${dms.degrees}° ${dms.minutes}' ${dms.seconds.toFixed(3)}" ${direction}`;
+            resultElement.classList.add('show');
+        });
+        
+        // Add sample data for demonstration
+        window.addEventListener('DOMContentLoaded', function() {
+            // Pre-fill some sample data for demonstration
+            document.getElementById('long-dms-degree').value = 45;
+            document.getElementById('long-dms-minute').value = 30;
+            document.getElementById('long-dms-second').value = 15;
+            
+            document.getElementById('lat-dms-degree').value = 30;
+            document.getElementById('lat-dms-minute').value = 15;
+            document.getElementById('lat-dms-second').value = 45.2;
+            
+            document.getElementById('long-dd').value = 45.504167;
+            document.getElementById('lat-dd').value = 30.2625;
+        });
+    </script>
+</body>
+</html>
