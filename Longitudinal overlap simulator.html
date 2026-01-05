@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شبیه‌ساز پوشش طولی فتوگرامتری</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--light);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: var(--success);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.2em;
+        }
+        
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        label {
+            color: var(--success);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input {
+            padding: 12px 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            background: linear-gradient(to right, var(--success), var(--primary));
+            border-radius: 4px;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid var(--primary);
+        }
+        
+        .range-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--success);
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9em;
+        }
+        
+        .canvas-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--success);
+        }
+        
+        .result-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--success);
+            margin: 10px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛫 شبیه‌ساز پوشش طولی فتوگرامتری</h1>
+            <p class="subtitle">محاسبه پوشش مشترک عکس‌های هوایی</p>
+        </header>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label>📏 طول ضلع عکس (متر)</label>
+                <input type="number" id="sideLength" value="700" min="1" max="10000">
+            </div>
+            
+            <div class="input-group">
+                <label>📊 همپوشانی طولی</label>
+                <div class="range-container">
+                    <input type="range" id="overlapRange" min="50" max="95" value="75">
+                    <div class="range-value" id="overlapValue">75%</div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>🛰️ تعداد عکس‌ها</label>
+                <input type="number" id="numPhotos" value="10" min="2" max="50">
+            </div>
+        </div>
+        
+        <div class="quick-stats">
+            <div class="stat-box">
+                <div class="stat-value" id="overlapArea">525</div>
+                <div class="stat-label">متر همپوشانی</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="effectiveCoverage">175</div>
+                <div class="stat-label">متر پوشش مؤثر</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="centerDistance">175</div>
+                <div class="stat-label">فاصله مراکز</div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="schematicCanvas" width="1000" height="400"></canvas>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4361ee;"></div>
+                    <span>عکس هوایی</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f72585;"></div>
+                    <span>منطقه همپوشانی</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffd43b;"></div>
+                    <span>خط پرواز</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results">
+            <div class="result-card">
+                <div>📸 تعداد عکس‌ها</div>
+                <div class="result-value" id="totalPhotos">10</div>
+            </div>
+            <div class="result-card">
+                <div>📏 فاصله مراکز</div>
+                <div class="result-value" id="centerDistanceResult">175 متر</div>
+            </div>
+            <div class="result-card">
+                <div>📐 طول کل ران</div>
+                <div class="result-value" id="totalLength">2275 متر</div>
+            </div>
+            <div class="result-card">
+                <div>🟦 مساحت پوشش</div>
+                <div class="result-value" id="coverageArea">1,592,500 متر²</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('schematicCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // مقدارهای اولیه
+        let sideLength = 700;
+        let overlap = 0.75;
+        let numPhotos = 10;
+        
+        // عناصر DOM
+        const sideLengthInput = document.getElementById('sideLength');
+        const overlapRange = document.getElementById('overlapRange');
+        const overlapValue = document.getElementById('overlapValue');
+        const numPhotosInput = document.getElementById('numPhotos');
+        
+        // به‌روزرسانی مقادیر
+        function updateValues() {
+            sideLength = parseFloat(sideLengthInput.value) || 100;
+            overlap = parseFloat(overlapRange.value) / 100;
+            numPhotos = parseInt(numPhotosInput.value) || 2;
+            
+            // محاسبات
+            const overlapArea = sideLength * overlap;
+            const effective = sideLength * (1 - overlap);
+            const centerDist = effective;
+            const totalLength = sideLength + (numPhotos - 1) * centerDist;
+            const totalArea = totalLength * sideLength;
+            
+            // به‌روزرسانی نمایش
+            document.getElementById('overlapArea').textContent = Math.round(overlapArea);
+            document.getElementById('effectiveCoverage').textContent = Math.round(effective);
+            document.getElementById('centerDistance').textContent = Math.round(centerDist);
+            document.getElementById('totalPhotos').textContent = numPhotos;
+            document.getElementById('centerDistanceResult').textContent = Math.round(centerDist) + ' متر';
+            document.getElementById('totalLength').textContent = Math.round(totalLength) + ' متر';
+            document.getElementById('coverageArea').textContent = Math.round(totalArea).toLocaleString() + ' متر²';
+            overlapValue.textContent = Math.round(overlap * 100) + '%';
+            
+            // رسم نمودار
+            drawSchematic();
+        }
+        
+        // رسم نمودار
+        function drawSchematic() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // مقیاس‌بندی
+            const displayWidth = 900;
+            const totalLength = sideLength + (numPhotos - 1) * (sideLength * (1 - overlap));
+            const scale = displayWidth / totalLength;
+            
+            const photoSize = sideLength * scale;
+            const centerDistance = sideLength * (1 - overlap) * scale;
+            const overlapSize = sideLength * overlap * scale;
+            
+            const startX = (canvas.width - totalLength * scale) / 2;
+            const photoY = (canvas.height - photoSize) / 2;
+            
+            // خط پرواز
+            ctx.strokeStyle = '#ffd43b';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            ctx.moveTo(startX - 50, canvas.height / 2);
+            ctx.lineTo(startX + totalLength * scale + 50, canvas.height / 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // رسم عکس‌ها
+            for (let i = 0; i < numPhotos; i++) {
+                const x = startX + i * centerDistance;
+                
+                // همپوشانی
+                if (i > 0) {
+                    ctx.fillStyle = 'rgba(247, 37, 133, 0.4)';
+                    ctx.fillRect(x, photoY, overlapSize, photoSize);
+                }
+                
+                // عکس
+                ctx.fillStyle = 'rgba(67, 97, 238, 0.8)';
+                ctx.fillRect(x, photoY, photoSize, photoSize);
+                
+                // شماره
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 20px Vazirmatn';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(i + 1, x + photoSize / 2, photoY + photoSize / 2);
+                
+                // مرکز
+                ctx.fillStyle = '#ffd43b';
+                ctx.beginPath();
+                ctx.arc(x + photoSize / 2, photoY + photoSize / 2, 6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // عنوان
+            ctx.fillStyle = '#4cc9f0';
+            ctx.font = 'bold 24px Vazirmatn';
+            ctx.textAlign = 'center';
+            ctx.fillText('نمودار پوشش طولی عکس‌های هوایی', canvas.width / 2, 50);
+        }
+        
+        // رویدادها
+        sideLengthInput.addEventListener('input', updateValues);
+        overlapRange.addEventListener('input', () => {
+            overlapValue.textContent = overlapRange.value + '%';
+            updateValues();
+        });
+        numPhotosInput.addEventListener('input', updateValues);
+        
+        // مقداردهی اولیه
+        updateValues();
+        
+        // تنظیم اندازه کانواس بر اساس صفحه
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 40;
+            if (canvas.width > 1000) canvas.width = 1000;
+            updateValues();
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    </script>
+</body>
+</html>

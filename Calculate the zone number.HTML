@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTM Zone Calculator</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #8b5cf6;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        header {
+            padding: 32px 32px 0;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 32px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            gap: 4px;
+        }
+        
+        .tab {
+            padding: 16px 24px;
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        
+        .tab:hover {
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .tab-content {
+            padding: 32px;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .input-group {
+            margin-bottom: 24px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .input-unit {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 16px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: var(--radius);
+            padding: 32px;
+            text-align: center;
+            margin-top: 32px;
+            border: 1px solid #bae6fd;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        
+        .result-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+            margin: 16px 0;
+        }
+        
+        .result-zone {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            line-height: 1;
+            margin: 16px 0;
+        }
+        
+        .result-full {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1;
+            margin: 16px 0;
+        }
+        
+        .result-description {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 16px;
+            line-height: 1.6;
+        }
+        
+        .examples {
+            background: #f8fafc;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 32px;
+        }
+        
+        .examples h3 {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .example-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .example-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .example-item:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .coordinates-display {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .coord {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            flex: 1;
+        }
+        
+        .coord-value {
+            color: var(--text);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        footer {
+            padding: 24px 32px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                padding: 0;
+            }
+            
+            .tab {
+                border-radius: 0;
+                text-align: right;
+                padding: 16px;
+            }
+            
+            .tab-content {
+                padding: 24px;
+            }
+            
+            .result-value,
+            .result-zone,
+            .result-full {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>UTM Zone Calculator</h1>
+            <div class="subtitle">محاسبه عدد زون، حرف زون یا زون کامل UTM</div>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="zone-number">عدد زون</button>
+            <button class="tab" data-tab="zone-letter">حرف زون</button>
+            <button class="tab" data-tab="full-zone">زون کامل</button>
+        </div>
+        
+        <!-- تب ۱: محاسبه عدد زون -->
+        <div id="zone-number" class="tab-content active">
+            <div class="input-group">
+                <label for="longitude-zone">طول جغرافیایی (Longitude)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="longitude-zone" min="-180" max="180" step="0.0001" placeholder="مثال: 51.3890">
+                    <div class="input-unit">°</div>
+                </div>
+            </div>
+            
+            <button onclick="calculateZoneNumber()">محاسبه عدد زون</button>
+            
+            <div class="examples">
+                <h3><span>📍</span> مثال‌های طول جغرافیایی</h3>
+                <div class="example-list">
+                    <div class="example-item" data-lon="51.3890">تهران، ایران</div>
+                    <div class="example-item" data-lon="-0.1276">لندن، انگلیس</div>
+                    <div class="example-item" data-lon="-74.0060">نیویورک، آمریکا</div>
+                    <div class="example-item" data-lon="139.6917">توکیو، ژاپن</div>
+                </div>
+            </div>
+            
+            <div class="result" id="zone-number-result">
+                <div class="result-label">عدد زون UTM برای طول جغرافیایی</div>
+                <div class="coordinates-display">
+                    <div class="coord">
+                        طول جغرافیایی
+                        <div class="coord-value" id="zone-number-coord">0.0000°</div>
+                    </div>
+                </div>
+                <div class="result-value" id="zone-number-value">0</div>
+                <div class="result-description">
+                    هر زون UTM عرض ۶ درجه دارد. عدد زون از ۱ (۱۸۰°W تا ۱۷۴°W) شروع می‌شود و تا ۶۰ (۱۷۴°E تا ۱۸۰°E) ادامه دارد.
+                </div>
+            </div>
+        </div>
+        
+        <!-- تب ۲: محاسبه حرف زون -->
+        <div id="zone-letter" class="tab-content">
+            <div class="input-group">
+                <label for="latitude-letter">عرض جغرافیایی (Latitude)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="latitude-letter" min="-90" max="90" step="0.0001" placeholder="مثال: 35.6892">
+                    <div class="input-unit">°</div>
+                </div>
+            </div>
+            
+            <button onclick="calculateZoneLetter()">محاسبه حرف زون</button>
+            
+            <div class="examples">
+                <h3><span>📍</span> مثال‌های عرض جغرافیایی</h3>
+                <div class="example-list">
+                    <div class="example-item" data-lat="35.6892">تهران، ایران</div>
+                    <div class="example-item" data-lat="51.5074">لندن، انگلیس</div>
+                    <div class="example-item" data-lat="40.7128">نیویورک، آمریکا</div>
+                    <div class="example-item" data-lat="35.6762">توکیو، ژاپن</div>
+                </div>
+            </div>
+            
+            <div class="result" id="zone-letter-result">
+                <div class="result-label">حرف زون UTM برای عرض جغرافیایی</div>
+                <div class="coordinates-display">
+                    <div class="coord">
+                        عرض جغرافیایی
+                        <div class="coord-value" id="zone-letter-coord">0.0000°</div>
+                    </div>
+                </div>
+                <div class="result-zone" id="zone-letter-value">A</div>
+                <div class="result-description">
+                    حروف زون UTM از C (۸۰°S تا ۷۲°S) شروع شده و تا X (۷۲°N تا ۸۴°N) ادامه دارد. حروف I و O استفاده نمی‌شوند.
+                </div>
+            </div>
+        </div>
+        
+        <!-- تب ۳: محاسبه زون کامل -->
+        <div id="full-zone" class="tab-content">
+            <div class="input-group">
+                <label for="latitude-full">عرض جغرافیایی (Latitude)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="latitude-full" min="-90" max="90" step="0.0001" placeholder="مثال: 35.6892">
+                    <div class="input-unit">°</div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="longitude-full">طول جغرافیایی (Longitude)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="longitude-full" min="-180" max="180" step="0.0001" placeholder="مثال: 51.3890">
+                    <div class="input-unit">°</div>
+                </div>
+            </div>
+            
+            <button onclick="calculateFullZone()">محاسبه زون کامل</button>
+            
+            <div class="examples">
+                <h3><span>📍</span> مثال‌های مختصات جغرافیایی</h3>
+                <div class="example-list">
+                    <div class="example-item" data-lat="35.6892" data-lon="51.3890">تهران، ایران</div>
+                    <div class="example-item" data-lat="51.5074" data-lon="-0.1276">لندن، انگلیس</div>
+                    <div class="example-item" data-lat="40.7128" data-lon="-74.0060">نیویورک، آمریکا</div>
+                    <div class="example-item" data-lat="35.6762" data-lon="139.6917">توکیو، ژاپن</div>
+                </div>
+            </div>
+            
+            <div class="result" id="full-zone-result">
+                <div class="result-label">زون کامل UTM</div>
+                <div class="coordinates-display">
+                    <div class="coord">
+                        عرض جغرافیایی
+                        <div class="coord-value" id="full-zone-lat">0.0000°</div>
+                    </div>
+                    <div class="coord">
+                        طول جغرافیایی
+                        <div class="coord-value" id="full-zone-lon">0.0000°</div>
+                    </div>
+                </div>
+                <div class="result-full" id="full-zone-value">0A</div>
+                <div class="result-description">
+                    زون کامل UTM شامل عدد زون (تعیین شده بر اساس طول جغرافیایی) و حرف زون (تعیین شده بر اساس عرض جغرافیایی) می‌باشد.
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <div>سیستم مختصات جهانی مرکاتور (UTM) • طراحی مینیمالیستی مدرن</div>
+            <div style="margin-top: 8px; font-size: 0.8rem;">هر زون ۶ درجه طول جغرافیایی دارد • حروف I و O استفاده نمی‌شوند</div>
+        </footer>
+    </div>
+
+    <script>
+        // مدیریت تب‌ها
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // حذف کلاس active از همه تب‌ها و محتواها
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // اضافه کردن کلاس active به تب و محتوای انتخاب شده
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // مثال‌های طول جغرافیایی (تب عدد زون)
+        document.querySelectorAll('#zone-number .example-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const lon = item.getAttribute('data-lon');
+                document.getElementById('longitude-zone').value = lon;
+            });
+        });
+        
+        // مثال‌های عرض جغرافیایی (تب حرف زون)
+        document.querySelectorAll('#zone-letter .example-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const lat = item.getAttribute('data-lat');
+                document.getElementById('latitude-letter').value = lat;
+            });
+        });
+        
+        // مثال‌های مختصات کامل (تب زون کامل)
+        document.querySelectorAll('#full-zone .example-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const lat = item.getAttribute('data-lat');
+                const lon = item.getAttribute('data-lon');
+                document.getElementById('latitude-full').value = lat;
+                document.getElementById('longitude-full').value = lon;
+            });
+        });
+        
+        // محاسبه عدد زون از طول جغرافیایی
+        function calculateZoneNumber() {
+            const lonInput = document.getElementById('longitude-zone');
+            const lon = parseFloat(lonInput.value);
+            const resultDiv = document.getElementById('zone-number-result');
+            
+            if (isNaN(lon) || lon < -180 || lon > 180) {
+                alert('لطفاً یک طول جغرافیایی معتبر بین ۱۸۰- تا ۱۸۰+ وارد کنید');
+                return;
+            }
+            
+            // فرمول استاندارد محاسبه عدد زون UTM
+            const zoneNumber = Math.floor((lon + 180) / 6) + 1;
+            
+            // نمایش نتایج
+            document.getElementById('zone-number-coord').textContent = `${lon.toFixed(4)}°`;
+            document.getElementById('zone-number-value').textContent = zoneNumber;
+            resultDiv.classList.add('show');
+        }
+        
+        // محاسبه حرف زون از عرض جغرافیایی
+        function calculateZoneLetter() {
+            const latInput = document.getElementById('latitude-letter');
+            const lat = parseFloat(latInput.value);
+            const resultDiv = document.getElementById('zone-letter-result');
+            
+            if (isNaN(lat) || lat < -90 || lat > 90) {
+                alert('لطفاً یک عرض جغرافیایی معتبر بین ۹۰- تا ۹۰+ وارد کنید');
+                return;
+            }
+            
+            // تعیین حرف زون بر اساس عرض جغرافیایی
+            let zoneLetter;
+            if (lat >= 84) zoneLetter = 'X';
+            else if (lat >= 72) zoneLetter = 'X';
+            else if (lat >= 64) zoneLetter = 'W';
+            else if (lat >= 56) zoneLetter = 'V';
+            else if (lat >= 48) zoneLetter = 'U';
+            else if (lat >= 40) zoneLetter = 'T';
+            else if (lat >= 32) zoneLetter = 'S';
+            else if (lat >= 24) zoneLetter = 'R';
+            else if (lat >= 16) zoneLetter = 'Q';
+            else if (lat >= 8) zoneLetter = 'P';
+            else if (lat >= 0) zoneLetter = 'N';
+            else if (lat >= -8) zoneLetter = 'M';
+            else if (lat >= -16) zoneLetter = 'L';
+            else if (lat >= -24) zoneLetter = 'K';
+            else if (lat >= -32) zoneLetter = 'J';
+            else if (lat >= -40) zoneLetter = 'H';
+            else if (lat >= -48) zoneLetter = 'G';
+            else if (lat >= -56) zoneLetter = 'F';
+            else if (lat >= -64) zoneLetter = 'E';
+            else if (lat >= -72) zoneLetter = 'D';
+            else zoneLetter = 'C';
+            
+            // نمایش نتایج
+            document.getElementById('zone-letter-coord').textContent = `${lat.toFixed(4)}°`;
+            document.getElementById('zone-letter-value').textContent = zoneLetter;
+            resultDiv.classList.add('show');
+        }
+        
+        // محاسبه زون کامل از هر دو مختصات
+        function calculateFullZone() {
+            const latInput = document.getElementById('latitude-full');
+            const lonInput = document.getElementById('longitude-full');
+            const lat = parseFloat(latInput.value);
+            const lon = parseFloat(lonInput.value);
+            const resultDiv = document.getElementById('full-zone-result');
+            
+            if (isNaN(lat) || lat < -90 || lat > 90) {
+                alert('لطفاً یک عرض جغرافیایی معتبر بین ۹۰- تا ۹۰+ وارد کنید');
+                return;
+            }
+            
+            if (isNaN(lon) || lon < -180 || lon > 180) {
+                alert('لطفاً یک طول جغرافیایی معتبر بین ۱۸۰- تا ۱۸۰+ وارد کنید');
+                return;
+            }
+            
+            // محاسبه عدد زون
+            const zoneNumber = Math.floor((lon + 180) / 6) + 1;
+            
+            // محاسبه حرف زون
+            let zoneLetter;
+            if (lat >= 84) zoneLetter = 'X';
+            else if (lat >= 72) zoneLetter = 'X';
+            else if (lat >= 64) zoneLetter = 'W';
+            else if (lat >= 56) zoneLetter = 'V';
+            else if (lat >= 48) zoneLetter = 'U';
+            else if (lat >= 40) zoneLetter = 'T';
+            else if (lat >= 32) zoneLetter = 'S';
+            else if (lat >= 24) zoneLetter = 'R';
+            else if (lat >= 16) zoneLetter = 'Q';
+            else if (lat >= 8) zoneLetter = 'P';
+            else if (lat >= 0) zoneLetter = 'N';
+            else if (lat >= -8) zoneLetter = 'M';
+            else if (lat >= -16) zoneLetter = 'L';
+            else if (lat >= -24) zoneLetter = 'K';
+            else if (lat >= -32) zoneLetter = 'J';
+            else if (lat >= -40) zoneLetter = 'H';
+            else if (lat >= -48) zoneLetter = 'G';
+            else if (lat >= -56) zoneLetter = 'F';
+            else if (lat >= -64) zoneLetter = 'E';
+            else if (lat >= -72) zoneLetter = 'D';
+            else zoneLetter = 'C';
+            
+            // نمایش نتایج
+            document.getElementById('full-zone-lat').textContent = `${lat.toFixed(4)}°`;
+            document.getElementById('full-zone-lon').textContent = `${lon.toFixed(4)}°`;
+            document.getElementById('full-zone-value').textContent = `${zoneNumber}${zoneLetter}`;
+            resultDiv.classList.add('show');
+        }
+        
+        // محاسبه اولیه برای نمایش نمونه
+        document.addEventListener('DOMContentLoaded', () => {
+            // تنظیم مقادیر پیش‌فرض
+            document.getElementById('longitude-zone').value = '51.3890';
+            document.getElementById('latitude-letter').value = '35.6892';
+            document.getElementById('latitude-full').value = '35.6892';
+            document.getElementById('longitude-full').value = '51.3890';
+            
+            // محاسبه نمونه
+            calculateZoneNumber();
+            calculateZoneLetter();
+            calculateFullZone();
+        });
+        
+        // فعال‌سازی کلید Enter برای هر تب
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                
+                if (activeTab === 'zone-number') {
+                    calculateZoneNumber();
+                } else if (activeTab === 'zone-letter') {
+                    calculateZoneLetter();
+                } else if (activeTab === 'full-zone') {
+                    calculateFullZone();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

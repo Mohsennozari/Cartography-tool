@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نقشه زون‌های UTM</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --text: #f1f5f9;
+            --text-light: #cbd5e1;
+            --border: #475569;
+            --zone-bg: #334155;
+            --zone-hover: #475569;
+            --zone-active: #10b981;
+            --equator: #f59e0b;
+            --prime-meridian: #ef4444;
+            --radius: 12px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .map-container {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .map-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .map-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .utm-grid {
+            display: grid;
+            grid-template-columns: repeat(60, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: auto;
+            max-height: 600px;
+            position: relative;
+        }
+        
+        .zone-row {
+            display: contents;
+        }
+        
+        .zone-cell {
+            background: var(--zone-bg);
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--surface);
+            min-height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .zone-cell:hover {
+            background: var(--zone-hover);
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .zone-cell.active {
+            background: var(--zone-active);
+            box-shadow: 0 0 0 2px var(--text);
+            z-index: 20;
+        }
+        
+        .zone-cell.equator {
+            border-top: 2px solid var(--equator);
+            border-bottom: 2px solid var(--equator);
+        }
+        
+        .zone-cell.prime-meridian-col {
+            position: relative;
+        }
+        
+        .zone-cell.prime-meridian-col::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--prime-meridian);
+            z-index: 5;
+        }
+        
+        .zone-cell.prime-meridian-col.left-border::after {
+            left: -1px;
+        }
+        
+        .zone-cell.prime-meridian-col.right-border::after {
+            right: -1px;
+        }
+        
+        .zone-number {
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+        
+        .zone-number.highlight {
+            color: #fbbf24;
+            font-weight: 900;
+        }
+        
+        .zone-number.west {
+            color: #60a5fa;
+        }
+        
+        .zone-number.east {
+            color: #fbbf24;
+        }
+        
+        .zone-letter {
+            font-size: 0.65rem;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+        
+        .zone-letter.equator {
+            color: var(--equator);
+            font-weight: bold;
+        }
+        
+        .map-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding: 0 5px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        
+        .map-labels .west {
+            color: #60a5fa;
+        }
+        
+        .map-labels .east {
+            color: #fbbf24;
+        }
+        
+        .prime-meridian-label {
+            position: absolute;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            z-index: 30;
+            pointer-events: none;
+            transform: translateX(-50%);
+            top: -25px;
+        }
+        
+        .sidebar {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        
+        input {
+            padding: 14px 16px;
+            background: #0f172a;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .coord-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        button {
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .result-section {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .result-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .result-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        
+        .result-item {
+            background: var(--surface);
+            padding: 12px;
+            border-radius: 6px;
+        }
+        
+        .result-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        
+        .result-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .full-zone {
+            grid-column: span 2;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e40af, #5b21b6);
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        
+        .full-zone-label {
+            font-size: 0.9rem;
+            color: #dbeafe;
+            margin-bottom: 8px;
+        }
+        
+        .full-zone-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+        
+        .map-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+        
+        .northern {
+            background: #3b82f6;
+        }
+        
+        .southern {
+            background: #8b5cf6;
+        }
+        
+        .equator-color {
+            background: var(--equator);
+        }
+        
+        .meridian-color {
+            background: var(--prime-meridian);
+        }
+        
+        .info-section {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 24px;
+        }
+        
+        .grid-axis {
+            position: absolute;
+            background: rgba(251, 191, 36, 0.3);
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .axis-label {
+            position: absolute;
+            font-size: 0.7rem;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 30;
+        }
+        
+        @media (max-width: 768px) {
+            .utm-grid {
+                grid-template-columns: repeat(30, 1fr);
+            }
+            
+            .zone-cell {
+                font-size: 0.6rem;
+                padding: 4px 2px;
+                min-height: 35px;
+            }
+        }
+        
+        .test-locations {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .test-btn {
+            padding: 10px;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 6px;
+            color: #d1d5db;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .test-btn:hover {
+            background: #4b5563;
+            border-color: #60a5fa;
+        }
+        
+        .location-info {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>نقشه کامل زون‌های UTM</h1>
+            <div class="subtitle">۶۰ زون عددی × ۲۰ حرف = ۱۲۰۰ زون - سیستم WGS84</div>
+        </header>
+        
+        <div class="main-content">
+            <div class="map-container">
+                <div class="map-header">
+                    <div class="map-title">نقشه زون‌های UTM (۱۲۰۰ زون)</div>
+                    <div style="font-size: 0.9rem; color: var(--text-light);">
+                        <span>🟦 شمال (بالا)</span> | <span>🟪 جنوب (پایین)</span>
+                    </div>
+                </div>
+                
+                <div class="utm-grid" id="utm-map">
+                    <!-- زون‌ها با JavaScript ساخته می‌شوند -->
+                </div>
+                
+                <div class="map-labels">
+                    <div class="west">غرب ← زون ۱ (180°W)</div>
+                    <div class="east">زون ۶۰ (180°E) → شرق</div>
+                </div>
+                
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <div class="legend-color northern"></div>
+                        <span>نیمکره شمالی (N-X) بالا</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color southern"></div>
+                        <span>نیمکره جنوبی (C-M) پایین</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color equator-color"></div>
+                        <span>مدار استوا (عرض 0°)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color meridian-color"></div>
+                        <span>نصف‌النهار مبدأ (طول 0°)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: var(--zone-active);"></div>
+                        <span>زون انتخاب شده</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="input-section">
+                    <h2 class="section-title">مختصات جغرافیایی</h2>
+                    
+                    <div class="coord-inputs">
+                        <div class="input-group">
+                            <label for="latitude">عرض جغرافیایی (Latitude)</label>
+                            <input type="number" id="latitude" min="-90" max="90" step="0.0001" 
+                                   placeholder="مثال: 35.6892" value="35.6892">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="longitude">طول جغرافیایی (Longitude)</label>
+                            <input type="number" id="longitude" min="-180" max="180" step="0.0001" 
+                                   placeholder="مثال: 51.3890" value="51.3890">
+                        </div>
+                    </div>
+                    
+                    <button onclick="findUTMZone()">
+                        <span>📍</span>
+                        پیدا کردن زون
+                    </button>
+                    
+                    <div class="test-locations">
+                        <div class="test-btn" onclick="testLocation('تهران', 35.6892, 51.3890)">
+                            تهران، ایران
+                            <div class="location-info">زون 39N</div>
+                        </div>
+                        <div class="test-btn" onclick="testLocation('لندن', 51.5074, -0.1278)">
+                            لندن، انگلیس
+                            <div class="location-info">زون 30U</div>
+                        </div>
+                        <div class="test-btn" onclick="testLocation('نیویورک', 40.7128, -74.0060)">
+                            نیویورک، آمریکا
+                            <div class="location-info">زون 18T</div>
+                        </div>
+                        <div class="test-btn" onclick="testLocation('سیدنی', -33.8688, 151.2093)">
+                            سیدنی، استرالیا
+                            <div class="location-info">زون 56H</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <strong>ایران در نقشه:</strong>
+                        <ul style="padding-right: 20px; margin-top: 8px;">
+                            <li>تهران: طول 51°E → زون 39</li>
+                            <li>موقعیت: شرق نصف‌النهار مبدأ (خط قرمز)</li>
+                            <li>نیمکره: شمالی (رنگ آبی)</li>
+                            <li>فاصله از استوا: 35° شمالی</li>
+                            <li>زون ایران: ۳۸ تا ۴۱ (بسته به موقعیت)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="result-section" id="result-section" style="display: none;">
+                    <div class="result-header">
+                        <div class="result-icon">📍</div>
+                        <div class="result-title">زون UTM یافت شده</div>
+                    </div>
+                    
+                    <div class="result-details">
+                        <div class="result-item">
+                            <div class="result-label">عدد زون</div>
+                            <div class="result-value" id="result-zone-number">39</div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">حرف زون</div>
+                            <div class="result-value" id="result-zone-letter">S</div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">نیمکره</div>
+                            <div class="result-value" id="result-hemisphere">شمالی</div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">محدوده عرضی</div>
+                            <div class="result-value" id="result-lat-range">32°N تا 40°N</div>
+                        </div>
+                        
+                        <div class="full-zone">
+                            <div class="full-zone-label">زون کامل UTM</div>
+                            <div class="full-zone-value" id="result-full-zone">39S</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h3 style="margin-bottom: 8px; color: var(--primary);">نصف‌النهار مبدأ (0°):</h3>
+                    <ul style="padding-right: 20px;">
+                        <li>خط قرمز بین زون‌های ۳۰ و ۳۱</li>
+                        <li>زون ۳۰: 6°W تا 0° (غربی)</li>
+                        <li>زون ۳۱: 0° تا 6°E (شرقی)</li>
+                        <li>ایران (51°E) → شرق خط قرمز → زون 39</li>
+                        <li>آمریکا (74°W) → غرب خط قرمز → زون 18</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <div>سیستم مختصات جهانی مرکاتور (UTM) - منطبق بر نقشه جغرافیایی</div>
+            <div style="margin-top: 8px; font-size: 0.8rem;">ایران: شرق نصف‌النهار مبدأ (زون‌های ۳۸-۴۱)</div>
+        </footer>
+    </div>
+
+    <script>
+        // تعریف حروف زون UTM به ترتیب از شمال به جنوب (از بالا به پایین)
+        const zoneLetters = [
+            'X', 'W', 'V', 'U', 'T', 'S', 'R', 'Q', 'P', 'N', // شمالی (بالا)
+            'M', 'L', 'K', 'J', 'H', 'G', 'F', 'E', 'D', 'C'  // جنوبی (پایین)
+        ];
+        
+        const zoneLatRanges = {
+            'C': '80°S تا 72°S', 'D': '72°S تا 64°S', 'E': '64°S تا 56°S',
+            'F': '56°S تا 48°S', 'G': '48°S تا 40°S', 'H': '40°S تا 32°S',
+            'J': '32°S تا 24°S', 'K': '24°S تا 16°S', 'L': '16°S تا 8°S',
+            'M': '8°S تا 0°', 'N': '0° تا 8°N', 'P': '8°N تا 16°N',
+            'Q': '16°N تا 24°N', 'R': '24°N تا 32°N', 'S': '32°N تا 40°N',
+            'T': '40°N تا 48°N', 'U': '48°N تا 56°N', 'V': '56°N تا 64°N',
+            'W': '64°N تا 72°N', 'X': '72°N تا 84°N'
+        };
+        
+        // ایجاد نقشه زون‌های UTM به ترتیب صحیح جغرافیایی
+        function createUTMMap() {
+            const mapContainer = document.getElementById('utm-map');
+            mapContainer.innerHTML = '';
+            
+            // تعیین موقعیت نصف‌النهار مبدأ (طول 0 درجه)
+            // نصف‌النهار مبدأ بین زون‌های 30 و 31 قرار دارد
+            const primeMeridianBetweenZones = true; // بین دو زون است
+            
+            // مدار استوا بین حرف M و N (ردیف 10 و 11 از بالا)
+            const equatorRowIndex = 9; // ردیف حرف N (شمارش از 0)
+            
+            // ایجاد 20 ردیف (برای هر حرف) - از شمال به جنوب (از بالا به پایین)
+            for (let letterIndex = 0; letterIndex < zoneLetters.length; letterIndex++) {
+                const letter = zoneLetters[letterIndex];
+                const isNorthern = ['X','W','V','U','T','S','R','Q','P','N'].includes(letter);
+                const isEquatorRow = letterIndex === equatorRowIndex; // حرف N (استوا)
+                
+                // ایجاد 60 ستون (برای هر عدد زون) - از 180°W به سمت شرق
+               for (let zoneNumber = 60; zoneNumber >= 1; zoneNumber--){
+                    const zoneCell = document.createElement('div');
+                    zoneCell.className = 'zone-cell';
+                    zoneCell.dataset.zoneNumber = zoneNumber;
+                    zoneCell.dataset.zoneLetter = letter;
+                    zoneCell.dataset.isNorthern = isNorthern;
+                    
+                    // مشخص کردن مدار استوا
+                    if (isEquatorRow) {
+                        zoneCell.classList.add('equator');
+                    }
+                    
+                    // مشخص کردن نصف‌النهار مبدأ
+                    // نصف‌النهار مبدأ بین زون 30 (آخرین زون غربی) و 31 (اولین زون شرقی) است
+                    if (primeMeridianBetweenZones) {
+                       if (zoneNumber === 30 || zoneNumber === 31) {
+    zoneCell.classList.add('prime-meridian-col');
+}
+
+                    }
+                    
+                    // رنگ‌بندی صحیح جغرافیایی:
+                    if (isNorthern) {
+                        // شمال = بالا = آبی
+                        zoneCell.style.background = 'linear-gradient(135deg, #1e3a8a, #3b82f6)';
+                        zoneCell.title = `زون ${zoneNumber}${letter} - نیمکره شمالی (بالا)`;
+                    } else {
+                        // جنوب = پایین = بنفش
+                        zoneCell.style.background = 'linear-gradient(135deg, #5b21b6, #8b5cf6)';
+                        zoneCell.title = `زون ${zoneNumber}${letter} - نیمکره جنوبی (پایین)`;
+                    }
+                    
+                    // برجسته کردن زون‌های ویژه
+                    const zoneNumberSpan = document.createElement('div');
+                    zoneNumberSpan.className = 'zone-number';
+                    
+                    if (zoneNumber === 1) {
+                        zoneNumberSpan.classList.add('highlight', 'west');
+                        zoneNumberSpan.textContent = `[${zoneNumber}]`;
+                        zoneNumberSpan.title = "180°W - غربی‌ترین نقطه";
+                    } else if (zoneNumber === 60) {
+                        zoneNumberSpan.classList.add('highlight', 'east');
+                        zoneNumberSpan.textContent = `[${zoneNumber}]`;
+                        zoneNumberSpan.title = "180°E - شرقی‌ترین نقطه";
+                    } else if (zoneNumber === 30 || zoneNumber === 31) {
+                        zoneNumberSpan.classList.add('highlight');
+                        zoneNumberSpan.textContent = zoneNumber;
+                        zoneNumberSpan.title = "نزدیک نصف‌النهار مبدأ (0°)";
+                    } else {
+                        zoneNumberSpan.textContent = zoneNumber;
+                    }
+                    
+                    // رنگ‌بندی برای شرق/غرب
+                    if (zoneNumber <= 30) {
+                        zoneNumberSpan.style.color = '#93c5fd'; // آبی روشن برای غرب
+                    } else {
+                        zoneNumberSpan.style.color = '#fbbf24'; // زرد برای شرق
+                    }
+                    
+                    const zoneLetterSpan = document.createElement('div');
+                    zoneLetterSpan.className = 'zone-letter';
+                    if (isEquatorRow) {
+                        zoneLetterSpan.classList.add('equator');
+                        zoneLetterSpan.textContent = `★ ${letter}`;
+                    } else {
+                        zoneLetterSpan.textContent = letter;
+                    }
+                    
+                    zoneCell.appendChild(zoneNumberSpan);
+                    zoneCell.appendChild(zoneLetterSpan);
+                    
+                    // رویداد کلیک روی زون
+                    zoneCell.addEventListener('click', () => {
+                        selectZone(zoneNumber, letter);
+                    });
+                    
+                    mapContainer.appendChild(zoneCell);
+                }
+            }
+            
+            // اضافه کردن برچسب نصف‌النهار مبدأ
+            addPrimeMeridianLabel();
+        }
+        
+        // اضافه کردن برچسب نصف‌النهار مبدأ
+       function addPrimeMeridianLabel() {
+    const mapContainer = document.getElementById('utm-map');
+    const cellWidth = 100 / 60; // درصد
+    const primeMeridianPosition = 30.5 * cellWidth; // بین سلول 30 و 31
+    
+    const label = document.createElement('div');
+    label.className = 'prime-meridian-label';
+    label.style.left = `${primeMeridianPosition}%`;
+    label.textContent = 'نصف‌النهار مبدأ (0°)';
+    mapContainer.appendChild(label);
+}
+
+        
+        // انتخاب زون روی نقشه
+        function selectZone(zoneNumber, zoneLetter) {
+            // حذف کلاس active از همه زون‌ها
+            document.querySelectorAll('.zone-cell').forEach(cell => {
+                cell.classList.remove('active');
+            });
+            
+            // پیدا کردن زون انتخاب شده و اضافه کردن کلاس active
+            document.querySelectorAll('.zone-cell').forEach(cell => {
+                if (parseInt(cell.dataset.zoneNumber) === zoneNumber && 
+                    cell.dataset.zoneLetter === zoneLetter) {
+                    cell.classList.add('active');
+                    
+                    // اسکرول به زون انتخاب شده
+                    cell.scrollIntoView({behavior: 'smooth', block: 'center', inline: 'center'});
+                }
+            });
+            
+            // نمایش اطلاعات زون
+            displayZoneInfo(zoneNumber, zoneLetter);
+        }
+        
+        // نمایش اطلاعات زون
+        function displayZoneInfo(zoneNumber, zoneLetter) {
+            const isNorthern = ['X','W','V','U','T','S','R','Q','P','N'].includes(zoneLetter);
+            const hemisphere = isNorthern ? 'شمالی' : 'جنوبی';
+            const latRange = zoneLatRanges[zoneLetter] || 'تعریف نشده';
+            
+            // تعیین موقعیت شرقی/غربی
+            let position = '';
+            if (zoneNumber <= 30) {
+                position = 'غرب نصف‌النهار مبدأ';
+            } else {
+                position = 'شرق نصف‌النهار مبدأ';
+            }
+            
+            document.getElementById('result-zone-number').textContent = zoneNumber;
+            document.getElementById('result-zone-letter').textContent = zoneLetter;
+            document.getElementById('result-hemisphere').textContent = hemisphere;
+            document.getElementById('result-lat-range').textContent = latRange;
+            document.getElementById('result-full-zone').textContent = `${zoneNumber}${zoneLetter}`;
+            
+            // نمایش بخش نتایج
+            document.getElementById('result-section').style.display = 'block';
+            
+            // نمایش توضیح اضافه در کنسول
+            console.log(`موقعیت: ${position} | زون: ${zoneNumber}${zoneLetter}`);
+        }
+        
+        // تست موقعیت‌های مختلف
+        function testLocation(name, lat, lon) {
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lon;
+            
+            // نمایش نام موقعیت
+            const resultTitle = document.querySelector('.result-title');
+            resultTitle.textContent = `زون UTM برای ${name}`;
+            
+            findUTMZone();
+        }
+        
+        // محاسبه زون UTM از مختصات جغرافیایی
+        function findUTMZone() {
+            const latInput = document.getElementById('latitude');
+            const lonInput = document.getElementById('longitude');
+            
+            const lat = parseFloat(latInput.value);
+            const lon = parseFloat(lonInput.value);
+            
+            // اعتبارسنجی
+            if (isNaN(lat) || lat < -90 || lat > 90) {
+                alert('لطفاً یک عرض جغرافیایی معتبر بین ۹۰- تا ۹۰+ وارد کنید');
+                return;
+            }
+            
+            if (isNaN(lon) || lon < -180 || lon > 180) {
+                alert('لطفاً یک طول جغرافیایی معتبر بین ۱۸۰- تا ۱۸۰+ وارد کنید');
+                return;
+            }
+            
+            // هشدار برای مناطق قطبی
+            if (lat > 84 || lat < -80) {
+                alert("⚠️ مناطق قطبی: بالای 84°N و پایین 80°S از سیستم UPS استفاده می‌کنند، نه UTM.");
+            }
+            
+            // محاسبه عدد زون
+            const zoneNumber = Math.floor((lon + 180) / 6) + 1;
+            
+            // محاسبه حرف زون بر اساس عرض جغرافیایی
+            let zoneLetter;
+            if (lat >= 84) zoneLetter = 'X';
+            else if (lat >= 72) zoneLetter = 'X';
+            else if (lat >= 64) zoneLetter = 'W';
+            else if (lat >= 56) zoneLetter = 'V';
+            else if (lat >= 48) zoneLetter = 'U';
+            else if (lat >= 40) zoneLetter = 'T';
+            else if (lat >= 32) zoneLetter = 'S';
+            else if (lat >= 24) zoneLetter = 'R';
+            else if (lat >= 16) zoneLetter = 'Q';
+            else if (lat >= 8) zoneLetter = 'P';
+            else if (lat >= 0) zoneLetter = 'N';
+            else if (lat >= -8) zoneLetter = 'M';
+            else if (lat >= -16) zoneLetter = 'L';
+            else if (lat >= -24) zoneLetter = 'K';
+            else if (lat >= -32) zoneLetter = 'J';
+            else if (lat >= -40) zoneLetter = 'H';
+            else if (lat >= -48) zoneLetter = 'G';
+            else if (lat >= -56) zoneLetter = 'F';
+            else if (lat >= -64) zoneLetter = 'E';
+            else if (lat >= -72) zoneLetter = 'D';
+            else zoneLetter = 'C';
+            
+            // انتخاب زون روی نقشه
+            selectZone(zoneNumber, zoneLetter);
+            
+            // اسکرول به بخش نتایج در موبایل
+            if (window.innerWidth < 1200) {
+                document.getElementById('result-section').scrollIntoView({behavior: 'smooth'});
+            }
+        }
+        
+        // مقداردهی اولیه
+        document.addEventListener('DOMContentLoaded', () => {
+            createUTMMap();
+            
+            // انتخاب زون تهران به عنوان نمونه
+            setTimeout(() => {
+                testLocation('تهران', 35.6892, 51.3890);
+            }, 500);
+            
+            // فعال کردن Enter
+            document.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    findUTMZone();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

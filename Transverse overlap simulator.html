@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شبیه‌ساز پوشش طولی و عرضی فتوگرامتری</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --danger: #e63946;
+            --lateral: #38b000;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 30px 60px rgba(0, 0, 0, 0.15);
+            --radius-sm: 12px;
+            --radius-md: 20px;
+            --radius-lg: 30px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, 
+                #0c0c2c 0%,
+                #1a1a3e 25%,
+                #2d2b55 50%,
+                #1a1a3e 75%,
+                #0c0c2c 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            margin: 0;
+            padding: 20px;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, 
+                rgba(67, 97, 238, 0.1) 0%, 
+                transparent 70%);
+            z-index: -1;
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 50%;
+            transform: translateX(50%);
+            width: 300px;
+            height: 4px;
+            background: linear-gradient(to right, 
+                transparent, 
+                var(--accent), 
+                transparent);
+            border-radius: 2px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: var(--gray);
+            font-size: 1.4em;
+            margin-bottom: 40px;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+        
+        .input-section {
+            background: linear-gradient(135deg, 
+                rgba(248, 249, 250, 0.95) 0%,
+                rgba(233, 236, 239, 0.95) 100%);
+            padding: 40px;
+            border-radius: var(--radius-md);
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .input-section:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .section-title {
+            font-size: 1.6em;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(67, 97, 238, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            font-size: 1.3em;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .input-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            font-size: 1.2em;
+        }
+        
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-top: 15px;
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid rgba(67, 97, 238, 0.1);
+            transition: var(--transition);
+        }
+        
+        .range-container:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 16px;
+            border-radius: 10px;
+            background: linear-gradient(to right, 
+                #4cc9f0, 
+                var(--primary), 
+                var(--secondary));
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        input[type="range"]:hover {
+            height: 20px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 36px;
+            height: 36px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+            border: 3px solid var(--primary);
+            transition: var(--transition);
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.6);
+        }
+        
+        .range-value {
+            font-size: 2.2em;
+            font-weight: 800;
+            color: var(--primary);
+            min-width: 90px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius-sm);
+            font-size: 1.3em;
+            text-align: center;
+            font-family: 'Vazirmatn', sans-serif;
+            transition: var(--transition);
+            background: white;
+            color: var(--dark);
+        }
+        
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .canvas-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+        
+        @media (max-width: 1200px) {
+            .canvas-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .canvas-wrapper {
+            background: linear-gradient(135deg, 
+                #0f172a 0%,
+                #1e293b 50%,
+                #0f172a 100%);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .canvas-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            z-index: 2;
+        }
+        
+        .canvas-wrapper:nth-child(1)::before {
+            background: linear-gradient(to right, 
+                var(--success), 
+                var(--primary), 
+                var(--accent));
+        }
+        
+        .canvas-wrapper:nth-child(2)::before {
+            background: linear-gradient(to right, 
+                var(--lateral), 
+                #38b000, 
+                #2d7d46);
+        }
+        
+        .canvas-title {
+            text-align: center;
+            color: white;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: var(--radius-sm);
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(76, 201, 240, 0.1);
+            background: radial-gradient(circle at center, 
+                #1e293b 0%,
+                #0f172a 100%);
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        canvas:hover {
+            transform: scale(1.005);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.6),
+                0 0 150px rgba(76, 201, 240, 0.2);
+        }
+        
+        .overlap-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .comparison-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+        
+        .comparison-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .comparison-card.longitudinal {
+            border-top: 6px solid var(--primary);
+        }
+        
+        .comparison-card.lateral {
+            border-top: 6px solid var(--lateral);
+        }
+        
+        .comparison-title {
+            font-size: 1.5em;
+            color: var(--dark);
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .comparison-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .metric-item {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: var(--radius-sm);
+        }
+        
+        .metric-value {
+            font-size: 2em;
+            font-weight: 800;
+            margin: 10px 0;
+        }
+        
+        .metric-label {
+            font-size: 0.9em;
+            color: var(--gray);
+        }
+        
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, 
+                var(--primary) 0%,
+                var(--secondary) 100%);
+            color: white;
+            padding: 35px 25px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .info-card:nth-child(3) {
+            background: linear-gradient(135deg, 
+                var(--lateral) 0%,
+                #2d7d46 100%);
+        }
+        
+        .info-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.25),
+                0 0 100px rgba(67, 97, 238, 0.2);
+        }
+        
+        .info-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-size: 2.8em;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin: 10px 0;
+            background: linear-gradient(45deg, white, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .unit {
+            font-size: 0.6em;
+            opacity: 0.9;
+            font-weight: 400;
+            margin-right: 5px;
+        }
+        
+        small {
+            color: var(--gray);
+            font-size: 0.9em;
+            display: block;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 35px;
+            margin-top: 35px;
+            flex-wrap: wrap;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.1em;
+            padding: 12px 20px;
+            border-radius: 50px;
+            background: rgba(67, 97, 238, 0.05);
+            transition: var(--transition);
+        }
+        
+        .legend-item:hover {
+            background: rgba(67, 97, 238, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid white;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 30px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .canvas-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .overlap-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .subtitle {
+                font-size: 1.1em;
+                margin-bottom: 30px;
+            }
+            
+            .input-section {
+                padding: 25px;
+            }
+            
+            .input-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .comparison-metrics {
+                grid-template-columns: 1fr;
+            }
+            
+            canvas {
+                max-width: 100%;
+                height: auto !important;
+            }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            border-radius: 10px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, var(--primary-dark), var(--secondary));
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛫 شبیه‌ساز پوشش طولی و عرضی فتوگرامتری</h1>
+        <p class="subtitle">محاسبه و نمایش پوشش مشترک طولی و عرضی عکس‌های هوایی در دو بعد</p>
+        
+        <div class="input-section">
+            <div class="section-title">
+                <span>📐 پارامترهای عمومی</span>
+            </div>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>طول هر ضلع عکس در واقعیت (مقیاس)</label>
+                    <input type="number" id="sideLength" min="1" max="10000" value="100" placeholder="متر">
+                    <small>مثلاً ۱۰۰ متر (طول و عرض هر عکس مربعی فرض می‌شود)</small>
+                </div>
+                
+                <div class="input-group">
+                    <label>واحد مقیاس</label>
+                    <input type="text" id="unitName" value="متر" placeholder="مثلاً متر، کیلومتر، فوت">
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>همپوشانی طولی (درصد)</label>
+                    <div class="range-container">
+                        <input type="range" id="longOverlapRange" min="50" max="95" value="75" step="1">
+                        <div class="range-value" id="longOverlapValue">75%</div>
+                    </div>
+                    <input type="number" id="longOverlap" min="50" max="95" value="75">
+                    <small>پوشش بین عکس‌ها در جهت پرواز</small>
+                </div>
+                
+                <div class="input-group">
+                    <label>همپوشانی عرضی (درصد)</label>
+                    <div class="range-container">
+                        <input type="range" id="latOverlapRange" min="30" max="80" value="60" step="1">
+                        <div class="range-value" id="latOverlapValue">60%</div>
+                    </div>
+                    <input type="number" id="latOverlap" min="30" max="80" value="60">
+                    <small>پوشش بین خطوط پرواز مجاور</small>
+                </div>
+            </div>
+            
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>تعداد عکس‌ها در هر ران</label>
+                    <input type="number" id="numPhotos" min="2" max="30" value="8">
+                </div>
+                
+                <div class="input-group">
+                    <label>تعداد ران‌های عرضی</label>
+                    <input type="number" id="numLines" min="1" max="10" value="3">
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-section">
+            <div class="canvas-wrapper">
+                <div class="canvas-title">نمایش پوشش طولی (ران پرواز)</div>
+                <canvas id="longitudinalCanvas" width="600" height="500"></canvas>
+            </div>
+            
+            <div class="canvas-wrapper">
+                <div class="canvas-title">نمایش پوشش عرضی (بین ران‌ها)</div>
+                <canvas id="lateralCanvas" width="600" height="500"></canvas>
+            </div>
+        </div>
+        
+        <div class="overlap-comparison">
+            <div class="comparison-card longitudinal">
+                <div class="comparison-title">پوشش طولی</div>
+                <div class="comparison-metrics">
+                    <div class="metric-item">
+                        <div class="metric-value" id="longOverlapAbs">75</div>
+                        <div class="metric-label">متر همپوشانی</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="longNonOverlapAbs">25</div>
+                        <div class="metric-label">متر عدم همپوشانی</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="longEffective">25</div>
+                        <div class="metric-label">متر پوشش مؤثر</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="centerDistance">25</div>
+                        <div class="metric-label">متر فاصله مراکز</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-card lateral">
+                <div class="comparison-title">پوشش عرضی</div>
+                <div class="comparison-metrics">
+                    <div class="metric-item">
+                        <div class="metric-value" id="latOverlapAbs">60</div>
+                        <div class="metric-label">متر همپوشانی</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="latNonOverlapAbs">40</div>
+                        <div class="metric-label">متر عدم همپوشانی</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="latEffective">40</div>
+                        <div class="metric-label">متر پوشش مؤثر</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="lineDistance">40</div>
+                        <div class="metric-label">متر فاصله خطوط</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <div class="info-card">
+                <div class="info-label">تعداد کل عکس‌ها</div>
+                <div class="info-value" id="totalPhotos">24</div>
+                <small>ران‌ها × عکس‌ها در هر ران</small>
+            </div>
+            <div class="info-card">
+                <div class="info-label">مساحت پوشش طولی</div>
+                <div class="info-value" id="longArea">—</div>
+                <small>مساحت پوشش در یک ران</small>
+            </div>
+            <div class="info-card">
+                <div class="info-label">مساحت پوشش کل</div>
+                <div class="info-value" id="totalArea">—</div>
+                <small>مساحت کل منطقه تحت پوشش</small>
+            </div>
+            <div class="info-card">
+                <div class="info-label">چگالی پوشش</div>
+                <div class="info-value" id="coverageDensity">—</div>
+                <small>عکس بر کیلومتر مربع</small>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: rgba(67, 97, 238, 0.6);"></div>
+                <span>پوشش طولی (جهت پرواز)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: rgba(56, 176, 0, 0.6);"></div>
+                <span>پوشش عرضی (بین خطوط)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to bottom, #4facfe, #00f2fe);"></div>
+                <span>عکس هوایی</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ffd43b;"></div>
+                <span>خط پرواز</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const longCanvas = document.getElementById('longitudinalCanvas');
+        const latCanvas = document.getElementById('lateralCanvas');
+        const longCtx = longCanvas.getContext('2d');
+        const latCtx = latCanvas.getContext('2d');
+
+        // همه ورودی‌ها آپدیت زنده داشته باشند
+        const inputs = ['sideLength', 'longOverlapRange', 'longOverlap', 
+                       'latOverlapRange', 'latOverlap', 'numPhotos', 
+                       'numLines', 'unitName'];
+        
+        inputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', updateVisualizations);
+        });
+
+        // همگام‌سازی اسلایدرها
+        document.getElementById('longOverlapRange').addEventListener('input', () => {
+            const val = document.getElementById('longOverlapRange').value;
+            document.getElementById('longOverlap').value = val;
+            document.getElementById('longOverlapValue').textContent = val + '%';
+        });
+
+        document.getElementById('latOverlapRange').addEventListener('input', () => {
+            const val = document.getElementById('latOverlapRange').value;
+            document.getElementById('latOverlap').value = val;
+            document.getElementById('latOverlapValue').textContent = val + '%';
+        });
+
+        function updateVisualizations() {
+            const sideLength = parseFloat(document.getElementById('sideLength').value) || 100;
+            const longOverlap = parseFloat(document.getElementById('longOverlapRange').value) / 100;
+            const latOverlap = parseFloat(document.getElementById('latOverlapRange').value) / 100;
+            const numPhotos = parseInt(document.getElementById('numPhotos').value) || 8;
+            const numLines = parseInt(document.getElementById('numLines').value) || 3;
+            const unit = document.getElementById('unitName').value || 'متر';
+
+            // محاسبات پوشش طولی
+            const longOverlapAbs = sideLength * longOverlap;
+            const longNonOverlapAbs = sideLength - longOverlapAbs;
+            const longEffective = longNonOverlapAbs;
+            const centerDistance = longEffective;
+            const longArea = (sideLength + (numPhotos - 1) * longEffective) * sideLength;
+
+            // محاسبات پوشش عرضی
+            const latOverlapAbs = sideLength * latOverlap;
+            const latNonOverlapAbs = sideLength - latOverlapAbs;
+            const latEffective = latNonOverlapAbs;
+            const lineDistance = latEffective;
+            const totalWidth = sideLength + (numLines - 1) * latEffective;
+            const totalArea = longArea * (numLines > 1 ? totalWidth / sideLength : 1);
+            const totalPhotos = numPhotos * numLines;
+            const coverageDensity = totalPhotos / (totalArea / 1000000);
+
+            // به‌روزرسانی پنل‌ها
+            document.getElementById('longOverlapAbs').textContent = Math.round(longOverlapAbs);
+            document.getElementById('longNonOverlapAbs').textContent = Math.round(longNonOverlapAbs);
+            document.getElementById('longEffective').textContent = Math.round(longEffective);
+            document.getElementById('centerDistance').textContent = Math.round(centerDistance);
+            
+            document.getElementById('latOverlapAbs').textContent = Math.round(latOverlapAbs);
+            document.getElementById('latNonOverlapAbs').textContent = Math.round(latNonOverlapAbs);
+            document.getElementById('latEffective').textContent = Math.round(latEffective);
+            document.getElementById('lineDistance').textContent = Math.round(lineDistance);
+            
+            document.getElementById('totalPhotos').textContent = totalPhotos;
+            document.getElementById('longArea').innerHTML = Math.round(longArea).toLocaleString() + ' <span class="unit">' + unit + '²</span>';
+            document.getElementById('totalArea').innerHTML = Math.round(totalArea).toLocaleString() + ' <span class="unit">' + unit + '²</span>';
+            document.getElementById('coverageDensity').innerHTML = Math.round(coverageDensity) + ' <span class="unit">عکس/کیلومتر²</span>';
+
+            // رسم شماتیک طولی
+            drawLongitudinalSchematic(sideLength, longOverlap, numPhotos, unit);
+            
+            // رسم شماتیک عرضی
+            drawLateralSchematic(sideLength, latOverlap, numLines, unit);
+        }
+
+        function drawLongitudinalSchematic(sideLength, overlap, numPhotos, unit) {
+            longCtx.clearRect(0, 0, longCanvas.width, longCanvas.height);
+            
+            // محاسبات مقیاس
+            const totalLength = sideLength + (numPhotos - 1) * sideLength * (1 - overlap);
+            const scale = 500 / totalLength;
+            const photoSize = sideLength * scale;
+            const centerDistance = sideLength * (1 - overlap) * scale;
+            
+            const startX = (longCanvas.width - totalLength * scale) / 2;
+            const centerY = longCanvas.height / 2;
+            const photoY = centerY - photoSize / 2;
+
+            // خط پرواز
+            longCtx.strokeStyle = '#ffd43b';
+            longCtx.lineWidth = 5;
+            longCtx.setLineDash([15, 10]);
+            longCtx.beginPath();
+            longCtx.moveTo(startX - 50, centerY);
+            longCtx.lineTo(startX + totalLength * scale + 50, centerY);
+            longCtx.stroke();
+            longCtx.setLineDash([]);
+
+            // فلش جهت
+            longCtx.fillStyle = '#ffd43b';
+            longCtx.beginPath();
+            longCtx.moveTo(startX + totalLength * scale + 30, centerY);
+            longCtx.lineTo(startX + totalLength * scale + 60, centerY - 15);
+            longCtx.lineTo(startX + totalLength * scale + 60, centerY + 15);
+            longCtx.closePath();
+            longCtx.fill();
+
+            // رسم عکس‌ها
+            for (let i = 0; i < numPhotos; i++) {
+                const x = startX + i * centerDistance;
+
+                // سایه
+                longCtx.fillStyle = 'rgba(0,0,0,0.4)';
+                longCtx.fillRect(x + 5, photoY + 5, photoSize, photoSize);
+
+                // عکس اصلی
+                const grad = longCtx.createLinearGradient(x, photoY, x, photoY + photoSize);
+                grad.addColorStop(0, '#4facfe');
+                grad.addColorStop(1, '#00f2fe');
+                longCtx.fillStyle = grad;
+                longCtx.fillRect(x, photoY, photoSize, photoSize);
+
+                // حاشیه
+                longCtx.strokeStyle = 'rgba(255,255,255,0.7)';
+                longCtx.lineWidth = 3;
+                longCtx.strokeRect(x + 2, photoY + 2, photoSize - 4, photoSize - 4);
+
+                // شماره
+                longCtx.fillStyle = 'white';
+                longCtx.font = 'bold 24px Vazirmatn';
+                longCtx.textAlign = 'center';
+                longCtx.textBaseline = 'middle';
+                longCtx.fillText(i + 1, x + photoSize / 2, photoY + photoSize / 2);
+
+                // پوشش طولی
+                if (i > 0) {
+                    const overlapWidth = sideLength * overlap * scale;
+                    longCtx.fillStyle = 'rgba(67, 97, 238, 0.6)';
+                    longCtx.fillRect(x, photoY, overlapWidth, photoSize);
+
+                    longCtx.fillStyle = 'white';
+                    longCtx.font = 'bold 16px Vazirmatn';
+                    longCtx.fillText(Math.round(overlap * 100) + '%', 
+                        x + overlapWidth / 2, 
+                        photoY + photoSize / 2);
+                }
+            }
+
+            // عنوان
+            longCtx.fillStyle = '#ffd43b';
+            longCtx.font = 'bold 24px Vazirmatn';
+            longCtx.textAlign = 'center';
+            longCtx.fillText('پوشش طولی (در جهت پرواز)', longCanvas.width / 2, 40);
+        }
+
+        function drawLateralSchematic(sideLength, overlap, numLines, unit) {
+            latCtx.clearRect(0, 0, latCanvas.width, latCanvas.height);
+            
+            // محاسبات مقیاس
+            const totalWidth = sideLength + (numLines - 1) * sideLength * (1 - overlap);
+            const scale = 400 / totalWidth;
+            const photoSize = sideLength * scale;
+            const lineDistance = sideLength * (1 - overlap) * scale;
+            
+            const startY = (latCanvas.height - totalWidth * scale) / 2;
+            const centerX = latCanvas.width / 2;
+            const photoX = centerX - photoSize / 2;
+
+            // خطوط پرواز (عمودی)
+            latCtx.strokeStyle = '#ffd43b';
+            latCtx.lineWidth = 5;
+            latCtx.setLineDash([15, 10]);
+            for (let i = 0; i < numLines; i++) {
+                const y = startY + i * lineDistance;
+                latCtx.beginPath();
+                latCtx.moveTo(centerX, y - 50);
+                latCtx.lineTo(centerX, y + photoSize + 50);
+                latCtx.stroke();
+            }
+            latCtx.setLineDash([]);
+
+            // فلش جهت
+            latCtx.fillStyle = '#ffd43b';
+            latCtx.beginPath();
+            latCtx.moveTo(centerX, startY - 30);
+            latCtx.lineTo(centerX - 15, startY);
+            latCtx.lineTo(centerX + 15, startY);
+            latCtx.closePath();
+            latCtx.fill();
+
+            // رسم عکس‌ها (عمودی - نمایش عرضی)
+            for (let i = 0; i < numLines; i++) {
+                const y = startY + i * lineDistance;
+
+                // سایه
+                latCtx.fillStyle = 'rgba(0,0,0,0.4)';
+                latCtx.fillRect(photoX + 5, y + 5, photoSize, photoSize);
+
+                // عکس اصلی
+                const grad = latCtx.createLinearGradient(photoX, y, photoX, y + photoSize);
+                grad.addColorStop(0, '#4facfe');
+                grad.addColorStop(1, '#00f2fe');
+                latCtx.fillStyle = grad;
+                latCtx.fillRect(photoX, y, photoSize, photoSize);
+
+                // حاشیه
+                latCtx.strokeStyle = 'rgba(255,255,255,0.7)';
+                latCtx.lineWidth = 3;
+                latCtx.strokeRect(photoX + 2, y + 2, photoSize - 4, photoSize - 4);
+
+                // شماره خط
+                latCtx.fillStyle = 'white';
+                latCtx.font = 'bold 24px Vazirmatn';
+                latCtx.textAlign = 'center';
+                latCtx.textBaseline = 'middle';
+                latCtx.fillText(i + 1, photoX + photoSize / 2, y + photoSize / 2);
+
+                // پوشش عرضی بین خطوط
+                if (i > 0) {
+                    const overlapHeight = sideLength * overlap * scale;
+                    latCtx.fillStyle = 'rgba(56, 176, 0, 0.6)';
+                    latCtx.fillRect(photoX, y, photoSize, overlapHeight);
+
+                    latCtx.fillStyle = 'white';
+                    latCtx.font = 'bold 16px Vazirmatn';
+                    latCtx.save();
+                    latCtx.translate(photoX + photoSize / 2, y + overlapHeight / 2);
+                    latCtx.rotate(Math.PI / 2);
+                    latCtx.fillText(Math.round(overlap * 100) + '%', 0, 0);
+                    latCtx.restore();
+                }
+            }
+
+            // عنوان
+            latCtx.fillStyle = '#ffd43b';
+            latCtx.font = 'bold 24px Vazirmatn';
+            latCtx.textAlign = 'center';
+            latCtx.fillText('پوشش عرضی (بین خطوط پرواز)', latCanvas.width / 2, 40);
+        }
+
+        // رسم اولیه
+        updateVisualizations();
+    </script>
+</body>
+</html>

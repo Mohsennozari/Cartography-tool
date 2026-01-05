@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شبیه‌سازی علمی برداشت عکس هوایی</title>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+/* =======================
+   Base & Layout
+======================= */
+body {
+    margin: 0;
+    font-family: Vazirmatn, sans-serif;
+    background: linear-gradient(180deg, #008a8c, #53baff);
+    color: #fff;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 16px;
+    gap: 16px;
+}
+
+/* =======================
+   Glass Panels
+======================= */
+.panel {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.controls {
+    flex: 1 1 260px;
+    max-width: 320px;
+}
+
+.controls h3 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.controls button {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    border: none;
+    border-radius: 10px;
+    background: #ffd500;
+    color: #000000;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.controls button:hover {
+    background: #7dd3fc;
+}
+
+.controls label {
+    display: block;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.controls input[type=range] {
+    width: 100%;
+}
+
+/* =======================
+   Stats
+======================= */
+.stats p {
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+/* =======================
+   Scene
+======================= */
+.scene-wrapper {
+    flex: 3 1 500px;
+    perspective: 1200px;
+}
+
+.scene {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    transform-style: preserve-3d;
+}
+
+.ground {
+    position: absolute;
+    width: 1600px;
+    height: 1200px;
+    background:#ffc400;
+    transform-origin: center;
+    transform: rotateX(70deg) translateZ(-200px);
+    border-radius: 20px;
+    border: #0a2540 3PX SOLID;
+}
+
+/* =======================
+   Flight Lines
+======================= */
+.flight-line {
+    position: absolute;
+    height: 2px;
+    background: rgba(255, 255, 255, 0);
+     border: #000000 3PX SOLID;
+}
+
+/* =======================
+   Photo Footprints
+======================= */
+.photo {
+    position: absolute;
+    border: 2px dashed rgb(0, 255, 200);
+    background: rgba(0, 255, 200, 0.165);
+    transition: background 0.2s;
+}
+
+.photo.active {
+    background: rgb(255, 0, 0);
+    border-color: yellow;
+     border: #0a2540 3PX SOLID;
+}
+
+/* =======================
+   Plane
+======================= */
+.plane {
+    position: absolute;
+    font-size: 28px;
+    color: #ffeb3b;
+    transform-origin: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- ================= Controls ================= -->
+    <div class="panel controls">
+        <h3><i class="fa-solid fa-plane"></i> کنترل شبیه‌سازی</h3>
+
+        <button id="startBtn">▶ شروع</button>
+        <button id="pauseBtn">⏸ توقف</button>
+        <button id="resetBtn">⟲ شروع مجدد</button>
+
+        <label>سرعت هواپیما</label>
+        <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1">
+
+        <label>زاویه دید سه‌بعدی</label>
+        <input type="range" id="tiltSlider" min="45" max="80" value="70">
+
+        <div class="stats">
+            <p>خط پرواز: <span id="lineStat">1</span> / 10</p>
+            <p>عکس گرفته شده: <span id="photoStat">0</span> / 200</p>
+            <p>درصد پوشش (نمایشی): <span id="coverageStat">0%</span></p>
+            <hr>
+            <p>همپوشانی طولی: 60٪</p>
+            <p>همپوشانی جانبی: 30٪</p>
+        </div>
+    </div>
+
+    <!-- ================= Scene ================= -->
+    <div class="panel scene-wrapper">
+        <div class="scene" id="scene">
+            <div class="ground" id="ground"></div>
+            <div class="plane" id="plane">✈</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* ======================
+   Scientific Parameters
+====================== */
+const FLIGHT_LINES = 10;
+const PHOTOS_PER_LINE = 20;
+const TOTAL_PHOTOS = FLIGHT_LINES * PHOTOS_PER_LINE;
+
+const FOOTPRINT_SIZE = 120;      // Conceptual ground footprint
+const LONG_OVERLAP = 0.6;
+const SIDE_OVERLAP = 0.3;
+
+const DX = FOOTPRINT_SIZE * (1 - LONG_OVERLAP);
+const DY = FOOTPRINT_SIZE * (1 - SIDE_OVERLAP);
+
+/* ======================
+   State
+====================== */
+let currentLine = 0;
+let currentPhoto = 0;
+let direction = 1;
+let running = false;
+let speed = 1;
+
+/* ======================
+   DOM
+====================== */
+const ground = document.getElementById('ground');
+const plane = document.getElementById('plane');
+
+const lineStat = document.getElementById('lineStat');
+const photoStat = document.getElementById('photoStat');
+const coverageStat = document.getElementById('coverageStat');
+
+/* ======================
+   Create Footprints & Lines
+====================== */
+const photos = [];
+
+for (let l = 0; l < FLIGHT_LINES; l++) {
+    const y = l * DY + 100;
+
+    const line = document.createElement('div');
+    line.className = 'flight-line';
+    line.style.top = y + 'px';
+    line.style.left = '100px';
+    line.style.width = DX * (PHOTOS_PER_LINE - 1) + 'px';
+    ground.appendChild(line);
+
+    for (let p = 0; p < PHOTOS_PER_LINE; p++) {
+        const x = p * DX + 100;
+
+        const photo = document.createElement('div');
+        photo.className = 'photo';
+        photo.style.width = FOOTPRINT_SIZE + 'px';
+        photo.style.height = FOOTPRINT_SIZE + 'px';
+        photo.style.left = x + 'px';
+        photo.style.top = y - FOOTPRINT_SIZE / 2 + 'px';
+
+        photo.dataset.index = l * PHOTOS_PER_LINE + p;
+        photos.push(photo);
+        ground.appendChild(photo);
+    }
+}
+
+/* ======================
+   Animation Loop
+====================== */
+function animate() {
+    if (!running) return;
+
+    const index = currentLine * PHOTOS_PER_LINE + currentPhoto;
+    const photo = photos[index];
+
+    photos.forEach(p => p.classList.remove('active'));
+    photo.classList.add('active');
+
+    plane.style.left = photo.style.left;
+    plane.style.top = (parseFloat(photo.style.top) - 40) + 'px';
+    plane.style.transform = direction === 1 ? 'rotate(0deg)' : 'rotate(180deg)';
+
+    photoStat.textContent = index + 1;
+    lineStat.textContent = currentLine + 1;
+    coverageStat.textContent = Math.round((index + 1) / TOTAL_PHOTOS * 100) + '%';
+
+    currentPhoto += direction;
+
+    if (currentPhoto >= PHOTOS_PER_LINE || currentPhoto < 0) {
+        direction *= -1;
+        currentPhoto += direction;
+        currentLine++;
+
+        if (currentLine >= FLIGHT_LINES) {
+            running = false;
+            return;
+        }
+    }
+
+    setTimeout(() => requestAnimationFrame(animate), 500 / speed);
+}
+
+/* ======================
+   Controls
+====================== */
+document.getElementById('startBtn').onclick = () => {
+    if (!running) {
+        running = true;
+        animate();
+    }
+};
+
+document.getElementById('pauseBtn').onclick = () => running = false;
+
+document.getElementById('resetBtn').onclick = () => {
+    running = false;
+    currentLine = 0;
+    currentPhoto = 0;
+    direction = 1;
+    photos.forEach(p => p.classList.remove('active'));
+    photoStat.textContent = 0;
+    coverageStat.textContent = '0%';
+};
+
+document.getElementById('speedSlider').oninput = e => speed = e.target.value;
+document.getElementById('tiltSlider').oninput = e =>
+    ground.style.transform = `rotateX(${e.target.value}deg) translateZ(-200px)`;
+</script>
+
+</body>
+</html>
