@@ -1,147 +1,164 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شبیه‌سازی علمی برداشت عکس هوایی</title>
+<meta charset="UTF-8"> <!-- تنظیم کاراکترهای صفحه به UTF-8 برای پشتیبانی از فارسی -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- تنظیم نمایش responsive برای موبایل و تبلت -->
 
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+<title>شبیه‌سازی علمی برداشت عکس هوایی</title> <!-- عنوان صفحه در تب مرورگر -->
+
+<!-- Font Awesome --> 
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> <!-- بارگذاری آیکون‌های Font Awesome از CDN -->
 
 <style>
+    *{
+        font-family:'vazirmatn', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+
+    }
 /* =======================
    Base & Layout
 ======================= */
 body {
-    margin: 0;
-    font-family: Vazirmatn, sans-serif;
-    background: linear-gradient(180deg, #008a8c, #53baff);
-    color: #fff;
+    margin: 0; /* حذف حاشیه پیش‌فرض بدنه صفحه */
+    font-family: Vazirmatn, sans-serif; /* تنظیم فونت اصلی صفحه به Vazirmatn (فونت فارسی) و fallback به sans-serif */
+    background: linear-gradient(180deg, #008a8c, #53baff); /* پس‌زمینه گرادیانت از پایین به بالا (آبی تیره به آبی روشن) */
+    color: #fff; /* رنگ متن پیش‌فرض سفید */
 }
 
 .container {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 16px;
-    gap: 16px;
+    display: flex; /* استفاده از Flexbox برای چیدمان افقی/عمودی */
+    flex-wrap: wrap; /* اجازه شکستن به خط بعدی در صفحه‌های کوچک */
+    padding: 100px; /* فاصله داخلی ۱۶ پیکسل از همه طرف */
+    gap:500px; /* فاصله بین المان‌های فرزند */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 /* =======================
    Glass Panels
 ======================= */
-.panel {
-    background: rgba(255,255,255,0.12);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+.panel.controls {
+   
+    background-color: #91e0ff56;
+    border-radius: 14px;
+    margin: 10px;
+    padding: 10px;
+    border: #000000 solid 2px;
 }
 
 .controls {
-    flex: 1 1 260px;
-    max-width: 320px;
+    flex: 1 1 260px; /* حداقل عرض ۲۶۰ پیکسل و رشد انعطاف‌پذیر */
+    max-width: 320px; /* حداکثر عرض پنل کنترل‌ها */
 }
 
 .controls h3 {
-    margin-top: 0;
-    font-size: 18px;
+    margin-top: 0; /* حذف حاشیه بالایی عنوان */
+    font-size: 18px; /* اندازه فونت عنوان */
 }
 
 .controls button {
-    width: 100%;
-    padding: 10px;
-    margin: 6px 0;
-    border: none;
-    border-radius: 10px;
-    background: #ffd500;
-    color: #000000;
-    font-weight: bold;
-    cursor: pointer;
+    width: 80%; /* دکمه‌ها تمام عرض را بگیرند */
+    padding: 10px; /* فاصله داخلی عمودی و افقی */
+    margin: 6px 0; /* فاصله عمودی بین دکمه‌ها */
+    border: none; /* حذف حاشیه پیش‌فرض */
+    border-radius: 10px; /* گرد کردن گوشه‌های دکمه */
+    background: #ffd500; /* رنگ پس‌زمینه زرد */
+    color: #000000; /* رنگ متن سیاه */
+    font-weight: bold; /* متن ضخیم */
+    cursor: pointer; /* نشانگر دست هنگام هاور */
 }
 
 .controls button:hover {
-    background: #7dd3fc;
+    background: #ffffff; /* تغییر رنگ پس‌زمینه هنگام هاور به آبی روشن */
 }
 
 .controls label {
-    display: block;
-    margin-top: 12px;
-    font-size: 14px;
+    display: block; /* برچسب‌ها به صورت بلوک (هر کدام یک خط) */
+    margin-top: 12px; /* فاصله بالای هر برچسب */
+    font-size: 14px; /* اندازه فونت برچسب */
 }
 
 .controls input[type=range] {
-    width: 100%;
+    width: 80%; /* اسلایدرها تمام عرض را بگیرند */
+    
+    
 }
 
 /* =======================
    Stats
 ======================= */
 .stats p {
-    margin: 6px 0;
-    font-size: 14px;
+    margin: 6px 0; /* فاصله عمودی کم بین پاراگراف‌های آمار */
+    font-size: 24px; /* اندازه فونت کوچک برای آمار */
 }
 
 /* =======================
    Scene
 ======================= */
 .scene-wrapper {
-    flex: 3 1 500px;
-    perspective: 1200px;
+    flex: 3 1 500px; /* این بخش ۳ برابر فضای بیشتر نسبت به کنترل‌ها بگیرد و حداقل ۵۰۰ پیکسل */
+    perspective: 2000px; /* ایجاد پرسپکتیو سه‌بعدی برای افکت عمق */
 }
 
 .scene {
-    position: relative;
-    width: 100%;
-    height: 70vh;
-    transform-style: preserve-3d;
+    position: relative; /* موقعیت نسبی برای قرارگیری مطلق فرزندان */
+    width: 100%; /* عرض کامل */
+    height: 70vh; /* ارتفاع ۷۰ درصد از ارتفاع viewport */
+    transform-style: preserve-3d; /* حفظ حالت سه‌بعدی برای فرزندان */
 }
 
 .ground {
-    position: absolute;
-    width: 1600px;
-    height: 1200px;
-    background:#ffc400;
-    transform-origin: center;
-    transform: rotateX(70deg) translateZ(-200px);
-    border-radius: 20px;
-    border: #0a2540 3PX SOLID;
+    position: absolute; /* موقعیت مطلق نسبت به .scene */
+    width: 1800px; /* عرض زمین بزرگ */
+    height: 1400px; /* ارتفاع زمین بزرگ */
+    background:#ffc400; /* رنگ زرد زمین */
+    transform-origin: center; /* نقطه مبدا تبدیل در مرکز */
+    transform: rotateX(40deg) translateZ(-300px); /* چرخش افقی و جابجایی به عقب برای افکت سه‌بعدی */
+    border-radius: 20px; /* گرد کردن گوشه‌های زمین */
+    border: #000000 8PX SOLID; /* حاشیه ضخیم آبی تیره */
 }
 
 /* =======================
    Flight Lines
 ======================= */
 .flight-line {
-    position: absolute;
-    height: 2px;
-    background: rgba(255, 255, 255, 0);
-     border: #000000 3PX SOLID;
+    position: absolute; /* موقعیت مطلق روی زمین */
+    height: 2px; /* ارتفاع خط بسیار کم */
+    background: rgb(255, 208, 0); /* پس‌زمینه کاملاً شفاف */
+     border: #ffcc00 3PX SOLID; /* حاشیه سیاه ضخیم برای نمایش خط پرواز */
 }
 
 /* =======================
    Photo Footprints
 ======================= */
 .photo {
-    position: absolute;
-    border: 2px dashed rgb(0, 255, 200);
-    background: rgba(0, 255, 200, 0.165);
-    transition: background 0.2s;
+    position: absolute; /* موقعیت مطلق روی زمین */
+    border: 2px dashed rgb(0, 0, 0); /* حاشیه خط‌چین فیروزه‌ای */
+    background: rgba(0, 0, 0, 0.165); /* پس‌زمینه نیمه‌شفاف فیروزه‌ای */
+    transition: background 0.2s; /* انیمیشن نرم تغییر پس‌زمینه */
 }
 
 .photo.active {
-    background: rgb(255, 0, 0);
-    border-color: yellow;
-     border: #0a2540 3PX SOLID;
+    background: rgb(255, 0, 0); /* هنگام فعال شدن، پس‌زمینه قرمز */
+    border-color: yellow; /* رنگ حاشیه زرد */
+     border: #0a2540 3PX SOLID; /* حاشیه ضخیم آبی تیره */
 }
 
 /* =======================
    Plane
 ======================= */
 .plane {
-    position: absolute;
-    font-size: 28px;
-    color: #ffeb3b;
-    transform-origin: center;
+    position: absolute; /* موقعیت مطلق برای دنبال کردن عکس‌ها */
+    font-size: 88px; /* اندازه آیکون هواپیما */
+    color: #ffffff; /* رنگ زرد روشن هواپیما */
+    transform-origin: center; /* نقطه چرخش در مرکز */
+    
 }
+
 </style>
 </head>
 
@@ -151,33 +168,33 @@ body {
 
     <!-- ================= Controls ================= -->
     <div class="panel controls">
-        <h3><i class="fa-solid fa-plane"></i> کنترل شبیه‌سازی</h3>
+        <h3><i class="fa-solid fa-plane"></i> کنترل شبیه‌سازی</h3> <!-- عنوان پنل کنترل با آیکون هواپیما -->
 
-        <button id="startBtn">▶ شروع</button>
-        <button id="pauseBtn">⏸ توقف</button>
-        <button id="resetBtn">⟲ شروع مجدد</button>
+        <button id="startBtn">▶ شروع</button> <!-- دکمه شروع شبیه‌سازی -->
+        <button id="pauseBtn">⏸ توقف</button> <!-- دکمه توقف -->
+        <button id="resetBtn">⟲ شروع مجدد</button> <!-- دکمه ریست -->
 
-        <label>سرعت هواپیما</label>
-        <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1">
+        <label>سرعت هواپیما</label> <!-- برچسب اسلایدر سرعت -->
+        <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1"> <!-- اسلایدر کنترل سرعت (۰.۵ تا ۳ برابر) -->
 
-        <label>زاویه دید سه‌بعدی</label>
-        <input type="range" id="tiltSlider" min="45" max="80" value="70">
+        <label>زاویه دید سه‌بعدی</label> <!-- برچسب اسلایدر زاویه -->
+        <input type="range" id="tiltSlider" min="45" max="80" value="70"> <!-- اسلایدر تغییر زاویه چرخش زمین (۴۵ تا ۸۰ درجه) -->
 
         <div class="stats">
-            <p>خط پرواز: <span id="lineStat">1</span> / 10</p>
-            <p>عکس گرفته شده: <span id="photoStat">0</span> / 200</p>
-            <p>درصد پوشش (نمایشی): <span id="coverageStat">0%</span></p>
-            <hr>
-            <p>همپوشانی طولی: 60٪</p>
-            <p>همپوشانی جانبی: 30٪</p>
+            <p>خط پرواز: <span id="lineStat">1</span> / 10</p> <!-- نمایش شماره خط پرواز جاری -->
+            <p>عکس گرفته شده: <span id="photoStat">0</span> / 200</p> <!-- تعداد عکس‌های گرفته شده -->
+            <p>درصد پوشش (نمایشی): <span id="coverageStat">0%</span></p> <!-- درصد پیشرفت شبیه‌سازی -->
+            <hr> <!-- خط جداکننده -->
+            <p>همپوشانی طولی: 60٪</p> <!-- مقدار ثابت همپوشانی طولی -->
+            <p>همپوشانی جانبی: 30٪</p> <!-- مقدار ثابت همپوشانی جانبی -->
         </div>
     </div>
 
     <!-- ================= Scene ================= -->
     <div class="panel scene-wrapper">
-        <div class="scene" id="scene">
-            <div class="ground" id="ground"></div>
-            <div class="plane" id="plane">✈</div>
+        <div class="scene" id="scene"> <!-- ظرف اصلی صحنه سه‌بعدی -->
+            <div class="ground" id="ground"></div> <!-- زمین که همه خطوط و عکس‌ها روی آن قرار می‌گیرند -->
+            <div class="plane" id="plane">✈</div> <!-- آیکون هواپیما -->
         </div>
     </div>
 
@@ -187,128 +204,129 @@ body {
 /* ======================
    Scientific Parameters
 ====================== */
-const FLIGHT_LINES = 10;
-const PHOTOS_PER_LINE = 20;
-const TOTAL_PHOTOS = FLIGHT_LINES * PHOTOS_PER_LINE;
+const FLIGHT_LINES = 5; // تعداد خطوط پرواز (۱۰ خط)
+const PHOTOS_PER_LINE = 10; // تعداد عکس در هر خط (۲۰ عکس)
+const TOTAL_PHOTOS = FLIGHT_LINES * PHOTOS_PER_LINE; // مجموع کل عکس‌ها (۲۰۰)
 
-const FOOTPRINT_SIZE = 120;      // Conceptual ground footprint
-const LONG_OVERLAP = 0.6;
-const SIDE_OVERLAP = 0.3;
+const FOOTPRINT_SIZE = 300;      // اندازه مفهومی ردپای عکس روی زمین (پیکسل)
+const LONG_OVERLAP = 0.6; // همپوشانی طولی ۶۰٪
+const SIDE_OVERLAP = 0.3; // همپوشانی جانبی ۳۰٪
 
-const DX = FOOTPRINT_SIZE * (1 - LONG_OVERLAP);
-const DY = FOOTPRINT_SIZE * (1 - SIDE_OVERLAP);
+const DX = FOOTPRINT_SIZE * (1 - LONG_OVERLAP); // فاصله افقی بین مراکز عکس‌ها (با احتساب همپوشانی طولی)
+const DY = FOOTPRINT_SIZE * (1 - SIDE_OVERLAP); // فاصله عمودی بین خطوط پرواز (با احتساب همپوشانی جانبی)
 
 /* ======================
    State
 ====================== */
-let currentLine = 0;
-let currentPhoto = 0;
-let direction = 1;
-let running = false;
-let speed = 1;
+let currentLine = 0; // شماره خط پرواز جاری (شروع از ۰)
+let currentPhoto = 0; // شماره عکس جاری در خط (شروع از ۰)
+let direction = 1; // جهت حرکت هواپیما: ۱ = راست به چپ، -۱ = چپ به راست
+let running = false; // وضعیت اجرا: آیا شبیه‌سازی در حال اجراست؟
+let speed = 1; // ضریب سرعت انیمیشن (کنترل شده توسط اسلایدر)
 
 /* ======================
    DOM
 ====================== */
-const ground = document.getElementById('ground');
-const plane = document.getElementById('plane');
+const ground = document.getElementById('ground'); // ارجاع به المان زمین
+const plane = document.getElementById('plane'); // ارجاع به المان هواپیما
 
-const lineStat = document.getElementById('lineStat');
-const photoStat = document.getElementById('photoStat');
-const coverageStat = document.getElementById('coverageStat');
+const lineStat = document.getElementById('lineStat'); // نمایش شماره خط
+const photoStat = document.getElementById('photoStat'); // نمایش تعداد عکس گرفته شده
+const coverageStat = document.getElementById('coverageStat'); // نمایش درصد پوشش
 
 /* ======================
    Create Footprints & Lines
 ====================== */
-const photos = [];
+const photos = []; // آرایه‌ای برای نگهداری همه المان‌های عکس
 
-for (let l = 0; l < FLIGHT_LINES; l++) {
-    const y = l * DY + 100;
+for (let l = 0; l < FLIGHT_LINES; l++) { // حلقه برای هر خط پرواز
+    const y = l * DY + 300; // محاسبه موقعیت عمودی خط (با فاصله اولیه ۱۰۰ پیکسل)
 
-    const line = document.createElement('div');
-    line.className = 'flight-line';
-    line.style.top = y + 'px';
-    line.style.left = '100px';
-    line.style.width = DX * (PHOTOS_PER_LINE - 1) + 'px';
-    ground.appendChild(line);
+    const line = document.createElement('div'); // ایجاد المان خط پرواز
+    line.className = 'flight-line'; // اضافه کردن کلاس استایل
+    line.style.top = y + 'px'; // تنظیم موقعیت عمودی
+    line.style.left = '100px'; // موقعیت افقی شروع خط
+    line.style.width = DX * (PHOTOS_PER_LINE - 1) + 'px'; // طول خط بر اساس فاصله عکس‌ها
+    ground.appendChild(line); // اضافه کردن خط به زمین
 
-    for (let p = 0; p < PHOTOS_PER_LINE; p++) {
-        const x = p * DX + 100;
+    for (let p = 0; p < PHOTOS_PER_LINE; p++) { // حلقه برای هر عکس در خط
+        const x = p * DX + 200; // محاسبه موقعیت افقی عکس
 
-        const photo = document.createElement('div');
-        photo.className = 'photo';
-        photo.style.width = FOOTPRINT_SIZE + 'px';
-        photo.style.height = FOOTPRINT_SIZE + 'px';
-        photo.style.left = x + 'px';
-        photo.style.top = y - FOOTPRINT_SIZE / 2 + 'px';
+        const photo = document.createElement('div'); // ایجاد المان عکس
+        photo.className = 'photo'; // اضافه کردن کلاس استایل
+        photo.style.width = FOOTPRINT_SIZE + 'px'; // عرض ردپای عکس
+        photo.style.height = FOOTPRINT_SIZE + 'px'; // ارتفاع ردپای عکس
+        photo.style.left = x + 'px'; // موقعیت افقی
+        photo.style.top = y - FOOTPRINT_SIZE / 2 + 'px'; // موقعیت عمودی (مرکز نسبت به خط)
 
-        photo.dataset.index = l * PHOTOS_PER_LINE + p;
-        photos.push(photo);
-        ground.appendChild(photo);
+        photo.dataset.index = l * PHOTOS_PER_LINE + p; // ذخیره اندیس کلی عکس در data-attribute
+        photos.push(photo); // اضافه کردن به آرایه
+        ground.appendChild(photo); // اضافه کردن به زمین
     }
 }
 
 /* ======================
    Animation Loop
 ====================== */
-function animate() {
-    if (!running) return;
+function animate() { // تابع اصلی انیمیشن
+    if (!running) return; // اگر متوقف شده، خارج شو
 
-    const index = currentLine * PHOTOS_PER_LINE + currentPhoto;
-    const photo = photos[index];
+    const index = currentLine * PHOTOS_PER_LINE + currentPhoto; // اندیس کلی عکس جاری
+    const photo = photos[index]; // گرفتن المان عکس جاری
 
-    photos.forEach(p => p.classList.remove('active'));
-    photo.classList.add('active');
+    photos.forEach(p => p.classList.remove('active')); // حذف کلاس active از همه عکس‌ها
+    photo.classList.add('active'); // اضافه کردن active به عکس جاری (تغییر رنگ)
 
-    plane.style.left = photo.style.left;
-    plane.style.top = (parseFloat(photo.style.top) - 40) + 'px';
-    plane.style.transform = direction === 1 ? 'rotate(0deg)' : 'rotate(180deg)';
+    plane.style.left = photo.style.left; // هواپیما دقیقاً بالای مرکز عکس قرار گیرد
+    plane.style.top = (parseFloat(photo.style.top) - 40) + 'px'; // کمی بالاتر از عکس
+    plane.style.transform = direction === 1 ? 'rotate(0deg)' : 'rotate(180deg)'; // چرخش هواپیما بر اساس جهت حرکت
 
-    photoStat.textContent = index + 1;
-    lineStat.textContent = currentLine + 1;
-    coverageStat.textContent = Math.round((index + 1) / TOTAL_PHOTOS * 100) + '%';
+    photoStat.textContent = index + 1; // به‌روزرسانی تعداد عکس (از ۱ شروع می‌شود)
+    lineStat.textContent = currentLine + 1; // به‌روزرسانی شماره خط
+    coverageStat.textContent = Math.round((index + 1) / TOTAL_PHOTOS * 100) + '%'; // محاسبه و نمایش درصد پیشرفت
 
-    currentPhoto += direction;
+    currentPhoto += direction; // حرکت به عکس بعدی در جهت فعلی
 
-    if (currentPhoto >= PHOTOS_PER_LINE || currentPhoto < 0) {
-        direction *= -1;
-        currentPhoto += direction;
-        currentLine++;
+    if (currentPhoto >= PHOTOS_PER_LINE || currentPhoto < 0) { // اگر به انتهای خط رسید
+        direction *= -1; // تغییر جهت
+        currentPhoto += direction; // یک قدم در جهت جدید
+        currentLine++; // رفتن به خط بعدی
 
-        if (currentLine >= FLIGHT_LINES) {
-            running = false;
+        if (currentLine >= FLIGHT_LINES) { // اگر همه خطوط تمام شد
+            running = false; // توقف شبیه‌سازی
             return;
         }
     }
 
-    setTimeout(() => requestAnimationFrame(animate), 500 / speed);
+    setTimeout(() => requestAnimationFrame(animate), 500 / speed); // فراخوانی بعدی انیمیشن با تاخیر معکوس سرعت
 }
 
 /* ======================
    Controls
 ====================== */
-document.getElementById('startBtn').onclick = () => {
-    if (!running) {
+document.getElementById('startBtn').onclick = () => { // کلیک روی دکمه شروع
+    if (!running) { // فقط اگر در حال اجرا نبود
         running = true;
-        animate();
+        animate(); // شروع انیمیشن
     }
 };
 
-document.getElementById('pauseBtn').onclick = () => running = false;
+document.getElementById('pauseBtn').onclick = () => running = false; // کلیک روی توقف → فقط متغیر running را false می‌کند
 
-document.getElementById('resetBtn').onclick = () => {
-    running = false;
-    currentLine = 0;
-    currentPhoto = 0;
-    direction = 1;
-    photos.forEach(p => p.classList.remove('active'));
-    photoStat.textContent = 0;
-    coverageStat.textContent = '0%';
+document.getElementById('resetBtn').onclick = () => { // کلیک روی ریست
+    running = false; // توقف انیمیشن
+    currentLine = 0; // بازگشت به خط اول
+    currentPhoto = 0; // بازگشت به عکس اول
+    direction = 1; // جهت اولیه
+    photos.forEach(p => p.classList.remove('active')); // حذف حالت active از همه
+    photoStat.textContent = 0; // صفر کردن شمارنده عکس
+    coverageStat.textContent = '0%'; // صفر کردن درصد
 };
 
-document.getElementById('speedSlider').oninput = e => speed = e.target.value;
-document.getElementById('tiltSlider').oninput = e =>
-    ground.style.transform = `rotateX(${e.target.value}deg) translateZ(-200px)`;
+document.getElementById('speedSlider').oninput = e => speed = e.target.value; // هر تغییر اسلایدر سرعت → به‌روزرسانی متغیر speed (عدد رشته به عدد تبدیل می‌شود)
+
+document.getElementById('tiltSlider').oninput = e => // هر تغییر اسلایدر زاویه
+    ground.style.transform = `rotateX(${e.target.value}deg) translateZ(-200px)`; // تغییر زاویه چرخش زمین به صورت زنده
 </script>
 
 </body>

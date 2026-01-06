@@ -2,1837 +2,571 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>سیستم نمایش پیشرفته مختصات UTM روی کره زمین</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>کره زمین با ۱۲۰۰ زون UTM</title>
+    <script src="https://unpkg.com/globe.gl"></script>
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
+            font-family: "Vazirmatn", Tahoma, sans-serif;
         }
         
-        body { 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Vazir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c2e 0%, #1a1a3e 100%);
+            color: #fff;
             overflow: hidden;
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            color: #333;
         }
         
-        canvas { 
-            display: block; 
+        #globe-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
         }
         
-        /* پنل اصلی ورودی */
-        .input-panel {
+        .header {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.98);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            width: 350px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            max-height: 90vh;
-            overflow-y: auto;
-            z-index: 100;
-        }
-        
-        .panel-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        
-        h3 {
-            color: #2c3e50;
-            margin: 0;
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .toggle-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #2c3e50;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        
-        .input-with-unit {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-        
-        input:focus {
-            border-color: #3498db;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-        
-        .unit {
-            background: #f8f9fa;
-            padding: 12px 15px;
-            border-radius: 8px;
-            border: 2px solid #e0e0e0;
-            min-width: 60px;
+            left: 20px;
             text-align: center;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        button {
-            padding: 14px;
-            background: linear-gradient(90deg, #3498db, #2980b9);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-            font-family: inherit;
-        }
-        
-        button:hover {
-            background: linear-gradient(90deg, #2980b9, #2573a7);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        button.secondary {
-            background: linear-gradient(90deg, #2ecc71, #27ae60);
-        }
-        
-        button.secondary:hover {
-            background: linear-gradient(90deg, #27ae60, #219653);
-        }
-        
-        /* نمایش مختصات */
-        .coords-display {
-            background: #f8f9fa;
-            padding: 20px;
+            z-index: 10;
+            background: rgba(0, 10, 30, 0.7);
+            padding: 15px;
             border-radius: 10px;
-            margin-top: 25px;
-            border-left: 4px solid #3498db;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            max-width: 600px;
+            margin: 0 auto;
         }
         
-        .coords-display h4 {
-            margin: 0 0 15px 0;
-            color: #2c3e50;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        h1 {
+            font-size: 5px;
+            margin-bottom: 8px;
+            color: #4fc3f7;
         }
         
-        .coords-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            font-size: 0.9rem;
-        }
-        
-        .coord-item {
-            padding: 8px;
-            background: white;
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .coord-label {
-            font-weight: 600;
-            color: #7f8c8d;
-            font-size: 0.85rem;
-            margin-bottom: 4px;
-        }
-        
-        .coord-value {
-            color: #2c3e50;
-            font-weight: 600;
-        }
-        
-        /* نقاط نمونه */
-        .sample-points {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid #eee;
-        }
-        
-        .sample-points h4 {
-            margin: 0 0 15px 0;
-            color: #2c3e50;
-            font-size: 1.1rem;
-        }
-        
-        .sample-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-        
-        .sample-btn {
-            padding: 12px;
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        
-        .sample-btn:hover {
-            background: #e3f2fd;
-            border-color: #3498db;
-            transform: translateY(-2px);
-        }
-        
-        .sample-name {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 4px;
-        }
-        
-        .sample-coords {
-            font-size: 0.8rem;
-            color: #7f8c8d;
-        }
-        
-        /* نقاط ذخیره شده */
-        .saved-points {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid #eee;
-        }
-        
-        .saved-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .saved-list {
-            max-height: 200px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        
-        .saved-item {
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .saved-item:hover {
-            background: #e3f2fd;
-            border-color: #3498db;
-            transform: translateX(-5px);
-        }
-        
-        .saved-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .subtitle {
+            font-size: 5px;
+            opacity: 0.9;
             margin-bottom: 5px;
         }
         
-        .saved-item-name {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .saved-item-delete {
-            color: #e74c3c;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 0;
-            width: auto;
-        }
-        
-        .saved-item-coords {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-        }
-        
-        /* کنترل‌های دوربین */
         .controls {
             position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            padding: 15px;
-            border-radius: 25px;
-            display: flex;
-            gap: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 100;
-        }
-        
-        .control-btn {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            transition: all 0.2s;
-        }
-        
-        .control-btn:hover {
-            background: rgba(52, 152, 219, 0.8);
-            transform: scale(1.1);
-        }
-        
-        /* پنل شبکه UTM */
-        .grid-panel {
-            position: absolute;
-            top: 20px;
+            bottom: 30px;
             left: 20px;
-            background: rgba(255, 255, 255, 0.98);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            width: 300px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            z-index: 100;
-        }
-        
-        .grid-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            z-index: 10;
+            background: rgba(0, 10, 30, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            display: flex;
+            flex-direction: column;
             gap: 10px;
-            margin-top: 15px;
+            max-width: 300px;
         }
         
-        .grid-option {
-            padding: 10px;
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
         
-        .grid-option.active {
-            background: #3498db;
+        label {
+            font-size: 5px;
+            color: #bbdefb;
+        }
+        
+        button, select {
+            padding: 8px 12px;
+            background: rgba(32, 64, 128, 0.7);
             color: white;
-            border-color: #2980b9;
+            border: 1px solid rgba(64, 156, 255, 0.5);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size:5px;
+            transition: all 0.3s ease;
         }
         
-        .grid-option:hover {
-            background: #e3f2fd;
-            border-color: #3498db;
+        button:hover, select:hover {
+            background: rgba(64, 128, 255, 0.7);
         }
         
-        /* پنل اطلاعات */
         .info-panel {
             position: absolute;
-            bottom: 100px;
+            bottom: 30px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 400px;
-            z-index: 100;
-            font-size: 0.9rem;
+            z-index: 10;
+            background: rgba(0, 10, 30, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            max-width: 320px;
+            font-size: 5px;
+            line-height: 1.5;
         }
         
-        .info-item {
-            margin-bottom: 10px;
+        .info-title {
+            color: #4fc3f7;
+            margin-bottom: 8px;
+            font-size: 5px;
+        }
+        
+        .zone-info {
+            color: #bbdefb;
+        }
+        
+        .highlight {
+            color: #ffcc80;
+            font-weight: bold;
+        }
+        
+        .grid-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .grid-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .grid-buttons button {
+            flex: 1;
+            font-size: 5px;
+            padding: 6px 8px;
+        }
+        
+        .grid-status {
             display: flex;
             justify-content: space-between;
+            margin-top: 5px;
         }
         
-        .info-label {
-            color: #95a5a6;
+        .grid-indicator {
+            font-size: 5px;
+            padding: 3px 8px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
         }
         
-        .info-value {
-            color: #ecf0f1;
-            font-weight: 600;
-        }
+        .utm-grid { color: #69f0ae; }
+        .geo-grid { color: #ff5252; }
         
-        /* مودال */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal h3 {
-            margin-bottom: 20px;
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        /* اسکرول بار */
-        .saved-list::-webkit-scrollbar,
-        .input-panel::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        .saved-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        
-        .saved-list::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-        
-        .saved-list::-webkit-scrollbar-thumb:hover {
-            background: #a1a1a1;
-        }
-        
-        /* ریسپانسیو */
-        @media (max-width: 1200px) {
-            .input-panel {
-                width: 320px;
-            }
-            
-            .grid-panel {
-                width: 280px;
-            }
-            
-            .controls {
-                bottom: 10px;
-                padding: 10px;
-            }
-            
-            .control-btn {
-                width: 45px;
-                height: 45px;
-            }
+        .active {
+            background: rgba(64, 128, 255, 0.9) !important;
+            border-color: #4fc3f7 !important;
         }
         
         @media (max-width: 768px) {
-            .input-panel {
-                width: calc(100% - 40px);
-                right: 20px;
-                left: 20px;
-                max-height: 50vh;
+            .controls, .info-panel {
+                max-width: 250px;
+                font-size: 5px;
             }
             
-            .grid-panel {
-                width: calc(100% - 40px);
-                left: 20px;
-                top: auto;
-                bottom: 20px;
+            .header {
+                padding: 10px;
+                font-size: 5px;
             }
             
-            .controls {
-                bottom: 80px;
+            h1 {
+                font-size:5px;
             }
             
-            .coords-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .sample-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .controls {
-                flex-wrap: wrap;
-                justify-content: center;
-                width: 90%;
-                border-radius: 15px;
-            }
-            
-            .control-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 1.1rem;
+            .grid-buttons {
+                flex-direction: column;
             }
         }
     </style>
-    
-    <!-- فونت وزیر -->
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
-    
-    <!-- کتابخانه‌های مورد نیاز -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
 </head>
 <body>
-    <!-- پنل اصلی ورودی -->
-    <div class="input-panel" id="inputPanel">
-        <div class="panel-header">
-            <h3>
-                <span>🌍</span>
-                سیستم نمایش مختصات UTM
-            </h3>
-            <button class="toggle-btn" onclick="togglePanel()">−</button>
-        </div>
-        
-        <!-- بخش ورود مختصات -->
-        <div class="input-group">
-            <label>Zone UTM (مثلاً 39N یا 10S):</label>
-            <input id="zone" type="text" placeholder="39N" value="39N">
-        </div>
-        
-        <div class="input-group">
-            <label>Easting:</label>
-            <div class="input-with-unit">
-                <input id="easting" type="number" placeholder="500000" value="500000" step="0.01">
-                <span class="unit">متر</span>
-            </div>
-        </div>
-        
-        <div class="input-group">
-            <label>Northing:</label>
-            <div class="input-with-unit">
-                <input id="northing" type="number" placeholder="3950000" value="3950000" step="0.01">
-                <span class="unit">متر</span>
-            </div>
-        </div>
-        
-        <button onclick="plotPoint()">📍 نمایش نقطه روی کره</button>
-        <button class="secondary" onclick="saveCurrentPoint()">💾 ذخیره نقطه</button>
-        
-        <!-- نمایش مختصات -->
-        <div class="coords-display">
-            <h4>📍 موقعیت فعلی</h4>
-            <div id="coordinates" class="coords-grid">
-                <div class="coord-item">
-                    <div class="coord-label">Zone UTM:</div>
-                    <div class="coord-value" id="coord-zone">--</div>
-                </div>
-                <div class="coord-item">
-                    <div class="coord-label">Easting:</div>
-                    <div class="coord-value" id="coord-easting">--</div>
-                </div>
-                <div class="coord-item">
-                    <div class="coord-label">Northing:</div>
-                    <div class="coord-value" id="coord-northing">--</div>
-                </div>
-                <div class="coord-item">
-                    <div class="coord-label">عرض جغرافیایی:</div>
-                    <div class="coord-value" id="coord-lat">--</div>
-                </div>
-                <div class="coord-item">
-                    <div class="coord-label">طول جغرافیایی:</div>
-                    <div class="coord-value" id="coord-lon">--</div>
-                </div>
-                <div class="coord-item">
-                    <div class="coord-label">نیمکره:</div>
-                    <div class="coord-value" id="coord-hemisphere">--</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- نقاط نمونه -->
-        <div class="sample-points">
-            <h4>📍 نقاط نمونه</h4>
-            <div class="sample-grid">
-                <div class="sample-btn" onclick="setSample('تهران', '39N', 535196, 3949546)">
-                    <div class="sample-name">تهران</div>
-                    <div class="sample-coords">39N, 535196, 3949546</div>
-                </div>
-                <div class="sample-btn" onclick="setSample('میدان آزادی', '39N', 535000, 3949500)">
-                    <div class="sample-name">میدان آزادی</div>
-                    <div class="sample-coords">39N, 535000, 3949500</div>
-                </div>
-                <div class="sample-btn" onclick="setSample('شیراز', '39R', 703000, 3284000)">
-                    <div class="sample-name">شیراز</div>
-                    <div class="sample-coords">39R, 703000, 3284000</div>
-                </div>
-                <div class="sample-btn" onclick="setSample('مشهد', '41S', 781000, 3973000)">
-                    <div class="sample-name">مشهد</div>
-                    <div class="sample-coords">41S, 781000, 3973000</div>
-                </div>
-                <div class="sample-btn" onclick="setSample('اصفهان', '39R', 570000, 3570000)">
-                    <div class="sample-name">اصفهان</div>
-                    <div class="sample-coords">39R, 570000, 3570000</div>
-                </div>
-                <div class="sample-btn" onclick="setSample('قطب شمال', '31X', 500000, 8800000)">
-                    <div class="sample-name">قطب شمال</div>
-                    <div class="sample-coords">31X, 500000, 8800000</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- نقاط ذخیره شده -->
-        <div class="saved-points">
-            <div class="saved-header">
-                <h4>📋 نقاط ذخیره شده</h4>
-                <button onclick="exportPoints()" style="width: auto; padding: 8px 15px;">📥 خروجی</button>
-            </div>
-            <div class="saved-list" id="savedPointsList">
-                <!-- نقاط ذخیره شده اینجا نمایش داده می‌شوند -->
-            </div>
-        </div>
-    </div>
+    <div id="globe-container"></div>
     
-    <!-- پنل کنترل شبکه -->
-    <div class="grid-panel" id="gridPanel">
-        <h4>🗺️ تنظیمات شبکه</h4>
-        <div class="grid-options">
-            <div class="grid-option active" onclick="toggleGrid('utm')">UTM</div>
-            <div class="grid-option" onclick="toggleGrid('geo')">جغرافیایی</div>
-            <div class="grid-option" onclick="toggleGrid('none')">بدون شبکه</div>
-        </div>
-        
-        <div style="margin-top: 20px;">
-            <label>ضخامت خطوط:</label>
-            <input type="range" id="gridThickness" min="1" max="5" value="2" onchange="updateGridThickness(this.value)">
-        </div>
-        
-        <div style="margin-top: 15px;">
-            <label>شفافیت:</label>
-            <input type="range" id="gridOpacity" min="0" max="100" value="50" onchange="updateGridOpacity(this.value)">
-        </div>
-        
-        <button onclick="highlightCurrentZone()" style="margin-top: 15px;">🗺️ هایلایت Zone فعلی</button>
-    </div>
-    
-    <!-- پنل اطلاعات -->
-    <div class="info-panel" id="infoPanel">
-        <div class="info-item">
-            <span class="info-label">فاصله تا مرکز:</span>
-            <span class="info-value" id="distanceToCenter">--</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">ارتفاع نقطه:</span>
-            <span class="info-value" id="pointElevation">--</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">تعداد نقاط:</span>
-            <span class="info-value" id="pointCount">0</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Grid فعال:</span>
-            <span class="info-value" id="activeGrid">UTM</span>
-        </div>
-    </div>
-    
-    <!-- کنترل‌های دوربین -->
     <div class="controls">
-        <button class="control-btn" onclick="rotateLeft()">↶</button>
-        <button class="control-btn" onclick="rotateRight()">↷</button>
-        <button class="control-btn" onclick="zoomIn()">+</button>
-        <button class="control-btn" onclick="zoomOut()">-</button>
-        <button class="control-btn" onclick="resetView()">↺</button>
-        <button class="control-btn" onclick="toggleAutoRotate()">⏯️</button>
-        <button class="control-btn" onclick="showAllPoints()">📍</button>
+        <div class="control-group">
+            <label for="rotation-speed">سرعت چرخش:</label>
+            <select id="rotation-speed">
+                <option value="0">بدون چرخش</option>
+                <option value="0.3" selected>کند</option>
+                <option value="0.6">متوسط</option>
+                <option value="1">سریع</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label for="label-visibility">نمایش برچسب‌ها:</label>
+            <select id="label-visibility">
+                <option value="all" selected>Grid Zone Designation</option>
+                <option value="zones">Zone Number</option>
+                <option value="letters">Zone Letter Only</option>
+                <option value="none">None</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label>کنترل گرید:</label>
+            <div class="grid-controls">
+                <div class="grid-buttons">
+                    <button id="toggle-utm-grid" class="active">UTM Grid</button>
+                    <button id="toggle-geo-grid">Geographic Grid</button>
+                </div>
+                <div class="grid-buttons">
+                    <button id="toggle-both-grids">هر دو گرید</button>
+                    <button id="clear-grids">بدون گرید</button>
+                </div>
+                <div class="grid-status">
+                    <span class="grid-indicator utm-grid" id="utm-status">UTM: روشن</span>
+                    <span class="grid-indicator geo-grid" id="geo-status">Geo: خاموش</span>
+                </div>
+            </div>
+        </div>
+        
+        <button id="reset-view">بازنشانی نمای کره</button>
     </div>
     
-    <!-- مودال برای وارد کردن چند نقطه -->
-    <div class="modal" id="multiPointModal" style="display: none;">
-        <div class="modal-content">
-            <h3>🎯 وارد کردن چند نقطه</h3>
-            <textarea id="multiPointsInput" rows="10" placeholder="هر خط یک نقطه به فرمت:
-Zone,Easting,Northing,نام
-مثال:
-39N,535196,3949546,تهران
-39N,535000,3949500,میدان آزادی"></textarea>
-            <div class="modal-actions">
-                <button onclick="importPoints()">📥 وارد کردن</button>
-                <button onclick="closeModal()">❌ بستن</button>
-            </div>
+    <div class="info-panel">
+        <div class="info-title">اطلاعات زون UTM</div>
+        <div class="zone-info">
+            <span id="selected-zone">روی یک زون کلیک کنید</span>
         </div>
     </div>
 
     <script>
-        // ==================== متغیرهای جهانی ====================
-        let scene, camera, renderer, earth, marker;
-        let controls, raycaster, mouse;
-        let savedPoints = [];
-        let activeGridType = 'utm';
-        let autoRotate = true;
-        let markerGroup = new THREE.Group();
-        let utmGrid = new THREE.Group();
-        let geoGrid = new THREE.Group();
+        // تنظیمات اولیه
+        const letters = 'CDEFGHJKLMNPQRSTUVWX';  // 20 حرف برای زون‌های عرضی (بدون I و O)
         
-        // ==================== مقداردهی اولیه ====================
-        function init() {
-            // ساخت صحنه
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a192f);
-            scene.add(markerGroup);
-            scene.add(utmGrid);
-            scene.add(geoGrid);
-            
-            // دوربین
-            camera = new THREE.PerspectiveCamera(
-                60, 
-                window.innerWidth / window.innerHeight, 
-                0.1, 
-                1000
-            );
-            camera.position.set(0, 0, 15);
-            
-            // رندرر
-            renderer = new THREE.WebGLRenderer({ 
-                antialias: true,
-                alpha: true 
-            });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            document.body.appendChild(renderer.domElement);
-            
-            // OrbitControls برای کنترل دوربین
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.rotateSpeed = 0.5;
-            controls.minDistance = 5;
-            controls.maxDistance = 30;
-            controls.enablePan = false;
-            
-            // نورپردازی
-            setupLighting();
-            
-            // ایجاد زمین
-            createEarth();
-            
-            // ایجاد نشانگر
-            createMarker();
-            
-            // ایجاد شبکه‌ها
-            createUTMGrid();
-            createGeographicGrid();
-            
-            // Raycaster برای تعامل
-            raycaster = new THREE.Raycaster();
-            mouse = new THREE.Vector2();
-            
-            // رویدادها
-            setupEventListeners();
-            
-            // بارگذاری نقاط ذخیره شده
-            loadSavedPoints();
-            
-            // انیمیشن
-            animate();
-            
-            // نمایش نقطه اولیه
-            setTimeout(() => {
-                plotPoint();
-            }, 500);
-        }
+        // ایجاد کره زمین
+        const globe = Globe()
+            .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+            .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+            .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+            .showAtmosphere(true)
+            .atmosphereColor('#3a228a')
+            .atmosphereAltitude(0.25)
+            .labelColor(() => '#ffffff')
+            .labelAltitude(0.01)
+            .labelResolution(3)
+            .labelDotRadius(0)
+            .labelSize(1.2)
+            (document.getElementById('globe-container'));
         
-        // ==================== نورپردازی ====================
-        function setupLighting() {
-            // نور محیطی
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-            
-            // نور اصلی (خورشید)
-            const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            sunLight.position.set(10, 10, 5);
-            sunLight.castShadow = true;
-            sunLight.shadow.mapSize.width = 2048;
-            sunLight.shadow.mapSize.height = 2048;
-            sunLight.shadow.camera.near = 0.5;
-            sunLight.shadow.camera.far = 50;
-            sunLight.shadow.camera.left = -20;
-            sunLight.shadow.camera.right = 20;
-            sunLight.shadow.camera.top = 20;
-            sunLight.shadow.camera.bottom = -20;
-            scene.add(sunLight);
-            
-            // نور کمکی
-            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-            fillLight.position.set(-5, -5, -5);
-            scene.add(fillLight);
-            
-            // نور پس‌زمینه
-            const backLight = new THREE.DirectionalLight(0xffffff, 0.2);
-            backLight.position.set(0, 0, -10);
-            scene.add(backLight);
-        }
+        // ایجاد ۱۲۰۰ زون (۶۰ طولی × ۲۰ عرضی)
+        const labels = [];
         
-        // ==================== ساخت کره زمین ====================
-        function createEarth() {
-            const geometry = new THREE.SphereGeometry(5, 128, 128);
-            
-            // بافت زمین با کیفیت بالا
-            const textureLoader = new THREE.TextureLoader();
-            const texture = textureLoader.load(
-                'image.png',
-                (texture) => {
-                    texture.encoding = THREE.sRGBEncoding;
-                    console.log('✅ بافت زمین بارگذاری شد');
-                },
-                undefined,
-                (err) => {
-                    console.error('❌ خطا در بارگذاری بافت زمین:', err);
-                    // استفاده از بافت جایگزین
-                    createProceduralEarth();
-                }
-            );
-            
-            // متریال زمین
-            const material = new THREE.MeshPhongMaterial({
-                map: texture,
-                shininess: 10,
-                specular: new THREE.Color(0x111111),
-                bumpScale: 0.05
-            });
-            
-            earth = new THREE.Mesh(geometry, material);
-            earth.rotation.y = -Math.PI / 2;
-            earth.castShadow = true;
-            earth.receiveShadow = true;
-            scene.add(earth);
-            
-            // ابرها
-            createClouds();
-            
-            // اتمسفر
-            createAtmosphere();
-        }
-        
-        // ==================== ایجاد زمین رویه‌ای ====================
-        function createProceduralEarth() {
-            const geometry = new THREE.SphereGeometry(5, 64, 64);
-            
-            // ایجاد بافت رویه‌ای
-            const canvas = document.createElement('canvas');
-            canvas.width = 1024;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            
-            // پس‌زمینه آبی (اقیانوس‌ها)
-            ctx.fillStyle = '#1a5fb4';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // خشکی‌ها
-            ctx.fillStyle = '#2ecc71';
-            
-            // آمریکای شمالی
-            ctx.fillRect(200, 100, 150, 200);
-            
-            // آمریکای جنوبی
-            ctx.fillRect(250, 300, 100, 150);
-            
-            // آفریقا
-            ctx.fillRect(400, 200, 120, 200);
-            
-            // اروپا
-            ctx.fillRect(450, 100, 100, 100);
-            
-            // آسیا
-            ctx.fillRect(500, 100, 200, 250);
-            
-            // استرالیا
-            ctx.fillRect(700, 350, 80, 80);
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.MeshPhongMaterial({
-                map: texture,
-                shininess: 5
-            });
-            
-            earth.material = material;
-        }
-        
-        // ==================== ایجاد ابرها ====================
-        function createClouds() {
-            const geometry = new THREE.SphereGeometry(5.1, 64, 64);
-            const material = new THREE.MeshPhongMaterial({
-                map: new THREE.TextureLoader().load('https://upload.wikimedia.org/wikipedia/commons/b/ba/NASA_Clouds.jpg'),
-                transparent: true,
-                opacity: 0.4,
-                depthWrite: false
-            });
-            
-            const clouds = new THREE.Mesh(geometry, material);
-            clouds.rotation.y = -Math.PI / 2;
-            scene.add(clouds);
-            
-            // انیمیشن ابرها
-            function animateClouds() {
-                clouds.rotation.y += 0.0003;
-                requestAnimationFrame(animateClouds);
+        for (let zone = 1; zone <= 60; zone++) {
+            for (let bandIdx = 0; bandIdx < 20; bandIdx++) {
+                const letter = letters[bandIdx];
+                
+                // محاسبه مرکز هر زون
+                const lonCenter = (zone - 30.5) * 6;  // مرکز زون ۱: -177° تا زون ۶۰: +177°
+                const latCenter = bandIdx * 8 + 4 - 80;  // از -80° تا +84°
+                
+                labels.push({
+                    id: `${zone}${letter}`,
+                    lat: latCenter,
+                    lng: lonCenter,
+                    text: `${zone}${letter}`,
+                    size: 1.2,
+                    color: '#ffffff',
+                    zone: zone,
+                    letter: letter,
+                    latCenter: latCenter,
+                    lngCenter: lonCenter,
+                    latRange: `${latCenter-4}° تا ${latCenter+4}°`,
+                    lngRange: `${lonCenter-3}° تا ${lonCenter+3}°`
+                });
             }
-            animateClouds();
         }
         
-        // ==================== ایجاد اتمسفر ====================
-        function createAtmosphere() {
-            const geometry = new THREE.SphereGeometry(5.2, 64, 64);
-            const material = new THREE.ShaderMaterial({
-                uniforms: {
-                    color1: { value: new THREE.Color(0x0077ff) },
-                    color2: { value: new THREE.Color(0x00aaff) }
-                },
-                vertexShader: `
-                    varying vec3 vNormal;
-                    void main() {
-                        vNormal = normalize(normalMatrix * normal);
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                    }
-                `,
-                fragmentShader: `
-                    uniform vec3 color1;
-                    uniform vec3 color2;
-                    varying vec3 vNormal;
-                    void main() {
-                        float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-                        gl_FragColor = vec4(mix(color1, color2, intensity), intensity * 0.3);
-                    }
-                `,
-                side: THREE.BackSide,
-                transparent: true,
-                blending: THREE.AdditiveBlending
+        // افزودن زون‌ها به کره
+        globe.labelsData(labels)
+            .labelLat(d => d.lat)
+            .labelLng(d => d.lng)
+            .labelText(d => d.text)
+            .labelSize(d => d.size)
+            .labelColor(d => d.color)
+            .onLabelClick(label => {
+                // نمایش اطلاعات زون انتخاب شده
+                document.getElementById('selected-zone').innerHTML = 
+                    `<span class="highlight">زون ${label.id}</span><br>
+                     مختصات مرکز: ${label.lat.toFixed(2)}°N, ${label.lng.toFixed(2)}°E<br>
+                     محدوده عرضی: ${label.latRange}<br>
+                     محدوده طولی: ${label.lngRange}<br>
+                     <span style="color: #69f0ae; font-size: 5px;">سیستم UTM: 6° × 8°</span>`;
             });
-            
-            const atmosphere = new THREE.Mesh(geometry, material);
-            scene.add(atmosphere);
-        }
         
-        // ==================== ساخت نشانگر ====================
-        function createMarker() {
-            // نقطه مرکزی
-            const pointGeometry = new THREE.SphereGeometry(0.15, 16, 16);
-            const pointMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0xff0000,
-                transparent: true,
-                opacity: 0.9
-            });
-            marker = new THREE.Mesh(pointGeometry, pointMaterial);
-            marker.visible = false;
-            markerGroup.add(marker);
-            
-            // خط عمودی
-            const lineGeometry = new THREE.CylinderGeometry(0.02, 0.02, 1, 8);
-            const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xff4444 });
-            const line = new THREE.Mesh(lineGeometry, lineMaterial);
-            line.position.y = 0.5;
-            marker.add(line);
-            
-            // حلقه نوری
-            const ringGeometry = new THREE.RingGeometry(0.25, 0.3, 32);
-            const ringMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0xff0000, 
-                side: THREE.DoubleSide,
-                transparent: true,
-                opacity: 0.5
-            });
-            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-            ring.rotation.x = Math.PI / 2;
-            marker.add(ring);
-            
-            // نور نقطه
-            const pointLight = new THREE.PointLight(0xff0000, 1, 3);
-            marker.add(pointLight);
-        }
+        // متغیرهای کنترل گرید
+        let utmGridEnabled = true;
+        let geoGridEnabled = false;
         
-        // ==================== ایجاد شبکه UTM ====================
+        // تابع برای ایجاد گرید UTM (هر 6 درجه طول، هر 8 درجه عرض)
         function createUTMGrid() {
-            const material = new THREE.LineBasicMaterial({ 
-                color: 0x00aaff,
-                transparent: true,
-                opacity: 0.3,
-                linewidth: 2
-            });
+            const utmGridLines = [];
+            const utmColor = '#69f0ae'; // سبز روشن
             
-            // خطوط نصف‌النهارهای UTM (هر 6 درجه)
-            for (let zone = 1; zone <= 60; zone++) {
-                const centralMeridian = (zone * 6) - 183;
-                const points = [];
-                
+            // خطوط طولی UTM (هر 6 درجه) - محدود به 90± درجه
+            for (let lon = -180; lon <= 180; lon += 6) {
+                const line = [];
                 for (let lat = -80; lat <= 84; lat += 2) {
-                    const coords = sphericalToCartesian(
-                        lat * Math.PI / 180,
-                        centralMeridian * Math.PI / 180,
-                        5.01
-                    );
-                    points.push(coords);
+                    // اطمینان از محدوده معتبر
+                    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+                        line.push([lat, lon]);
+                    }
                 }
-                
-                const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                const line = new THREE.Line(geometry, material);
-                line.userData.type = 'utm-meridian';
-                line.userData.zone = zone;
-                utmGrid.add(line);
-            }
-            
-            // خطوط مدارها (هر 8 درجه)
-            for (let lat = -80; lat <= 84; lat += 8) {
-                const points = [];
-                
-                for (let lon = -180; lon <= 180; lon += 1) {
-                    const coords = sphericalToCartesian(
-                        lat * Math.PI / 180,
-                        lon * Math.PI / 180,
-                        5.01
-                    );
-                    points.push(coords);
-                }
-                
-                const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                const line = new THREE.Line(geometry, material);
-                line.userData.type = 'utm-parallel';
-                line.userData.latitude = lat;
-                utmGrid.add(line);
-            }
-            
-            utmGrid.visible = true;
-        }
-        
-        // ==================== ایجاد شبکه جغرافیایی ====================
-        function createGeographicGrid() {
-            const material = new THREE.LineBasicMaterial({ 
-                color: 0x2ecc71,
-                transparent: true,
-                opacity: 0.2,
-                linewidth: 1
-            });
-            
-            // نصف‌النهارها (هر 15 درجه)
-            for (let lon = -180; lon <= 180; lon += 15) {
-                const points = [];
-                
-                for (let lat = -90; lat <= 90; lat += 1) {
-                    const coords = sphericalToCartesian(
-                        lat * Math.PI / 180,
-                        lon * Math.PI / 180,
-                        5.01
-                    );
-                    points.push(coords);
-                }
-                
-                const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                const line = new THREE.Line(geometry, material);
-                line.userData.type = 'geo-meridian';
-                line.userData.longitude = lon;
-                geoGrid.add(line);
-            }
-            
-            // مدارها (هر 15 درجه)
-            for (let lat = -90; lat <= 90; lat += 15) {
-                const points = [];
-                
-                for (let lon = -180; lon <= 180; lon += 1) {
-                    const coords = sphericalToCartesian(
-                        lat * Math.PI / 180,
-                        lon * Math.PI / 180,
-                        5.01
-                    );
-                    points.push(coords);
-                }
-                
-                const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                const line = new THREE.Line(geometry, material);
-                line.userData.type = 'geo-parallel';
-                line.userData.latitude = lat;
-                geoGrid.add(line);
-            }
-            
-            geoGrid.visible = false;
-        }
-        
-        // ==================== تبدیل UTM به مختصات جغرافیایی ====================
-        function convertUTMToLatLon(zone, easting, northing) {
-            try {
-                // استخراج عدد zone و حرف hemisphere
-                const zoneNum = parseInt(zone.match(/\d+/)[0]);
-                const hemisphere = zone.match(/[NS]/i)[0].toUpperCase();
-                
-                // تعریف projection های مختلف UTM
-                const utmProj = `+proj=utm +zone=${zoneNum} +${hemisphere === 'N' ? 'north' : 'south'} +ellps=WGS84 +datum=WGS84 +units=m +no_defs`;
-                const wgs84Proj = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs';
-                
-                // تبدیل با proj4
-                const result = proj4(utmProj, wgs84Proj, [easting, northing]);
-                
-                // برگشت نتیجه
-                return {
-                    success: true,
-                    lat: result[1],  // عرض جغرافیایی
-                    lon: result[0],  // طول جغرافیایی
-                    latDeg: result[1],
-                    lonDeg: result[0],
-                    hemisphere: hemisphere
-                };
-            } catch (error) {
-                console.warn('خطا در تبدیل دقیق UTM، استفاده از تبدیل تقریبی:', error);
-                
-                // تبدیل تقریبی (برای مواقعی که proj4 کار نمی‌کند)
-                const centralMeridian = (parseInt(zone) * 6) - 183;
-                const earthRadius = 6378137; // WGS84
-                
-                // محاسبات تقریبی
-                const latRad = ((northing / earthRadius) - 0.5) * Math.PI;
-                const lonRad = (centralMeridian * (Math.PI / 180)) + ((easting - 500000) / (earthRadius * Math.cos(latRad)));
-                
-                return {
-                    success: false,
-                    lat: latRad,
-                    lon: lonRad,
-                    latDeg: (latRad * 180 / Math.PI).toFixed(6),
-                    lonDeg: (lonRad * 180 / Math.PI).toFixed(6),
-                    hemisphere: zone.includes('N') ? 'N' : 'S'
-                };
-            }
-        }
-        
-        // ==================== تبدیل مختصات کروی به کارتزین ====================
-        function sphericalToCartesian(lat, lon, radius = 5) {
-            const phi = (90 - (lat * 180 / Math.PI)) * Math.PI / 180;
-            const theta = (lon * 180 / Math.PI + 180) * Math.PI / 180;
-            
-            const x = -(radius * Math.sin(phi) * Math.cos(theta));
-            const y = radius * Math.cos(phi);
-            const z = radius * Math.sin(phi) * Math.sin(theta);
-            
-            return new THREE.Vector3(x, y, z);
-        }
-        
-        // ==================== رسم نقطه روی کره ====================
-        function plotPoint() {
-            // دریافت مقادیر ورودی
-            const zone = document.getElementById('zone').value.trim().toUpperCase();
-            const easting = parseFloat(document.getElementById('easting').value);
-            const northing = parseFloat(document.getElementById('northing').value);
-            
-            // اعتبارسنجی
-            if (!zone || !zone.match(/^\d+[NS]$/i)) {
-                alert('فرمت Zone نامعتبر است. مثال صحیح: 39N یا 10S');
-                return;
-            }
-            
-            if (isNaN(easting) || isNaN(northing)) {
-                alert('لطفا مقادیر Easting و Northing را به درستی وارد کنید.');
-                return;
-            }
-            
-            // تبدیل UTM به Lat/Lon
-            const latLon = convertUTMToLatLon(zone, easting, northing);
-            
-            if (!latLon.success) {
-                console.warn('از تبدیل تقریبی استفاده شد');
-            }
-            
-            // تبدیل به مختصات کارتزین
-            const cartesianCoords = sphericalToCartesian(
-                latLon.lat * Math.PI / 180, 
-                latLon.lon * Math.PI / 180
-            );
-            
-            // انتقال نشانگر
-            marker.position.copy(cartesianCoords);
-            marker.visible = true;
-            
-            // به روزرسانی نمایش مختصات
-            updateCoordinatesDisplay(zone, easting, northing, latLon);
-            
-            // محاسبه فاصله تا مرکز
-            const distance = cartesianCoords.length();
-            document.getElementById('distanceToCenter').textContent = distance.toFixed(2) + ' واحد';
-            
-            // محاسبه ارتفاع
-            const elevation = (distance - 5) * 1000; // ارتفاع از سطح زمین به متر
-            document.getElementById('pointElevation').textContent = elevation.toFixed(2) + ' متر';
-            
-            // هایلایت Zone مربوطه
-            highlightUTMZone(parseInt(zone));
-            
-            // به سمت نقطه زوم کردن
-            focusOnPoint(cartesianCoords);
-            
-            console.log('📍 نقطه نمایش داده شد:', {
-                zone, easting, northing,
-                lat: latLon.latDeg, lon: latLon.lonDeg,
-                cartesian: cartesianCoords
-            });
-        }
-        
-        // ==================== به‌روزرسانی نمایش مختصات ====================
-        function updateCoordinatesDisplay(zone, easting, northing, latLon) {
-            document.getElementById('coord-zone').textContent = zone;
-            document.getElementById('coord-easting').textContent = easting.toLocaleString() + ' m';
-            document.getElementById('coord-northing').textContent = northing.toLocaleString() + ' m';
-            document.getElementById('coord-lat').textContent = parseFloat(latLon.latDeg).toFixed(6) + '°';
-            document.getElementById('coord-lon').textContent = parseFloat(latLon.lonDeg).toFixed(6) + '°';
-            document.getElementById('coord-hemisphere').textContent = 
-                latLon.hemisphere === 'N' ? 'شمالی' : 'جنوبی';
-        }
-        
-        // ==================== ذخیره نقطه فعلی ====================
-        function saveCurrentPoint() {
-            const zone = document.getElementById('zone').value.trim();
-            const easting = document.getElementById('easting').value;
-            const northing = document.getElementById('northing').value;
-            
-            if (!zone || !easting || !northing) {
-                alert('لطفا ابتدا یک نقطه را نمایش دهید.');
-                return;
-            }
-            
-            const pointName = prompt('نام نقطه را وارد کنید:', `نقطه ${savedPoints.length + 1}`);
-            
-            if (!pointName) return;
-            
-            const point = {
-                id: Date.now(),
-                name: pointName,
-                zone,
-                easting: parseFloat(easting),
-                northing: parseFloat(northing),
-                timestamp: new Date().toLocaleString('fa-IR'),
-                color: getRandomColor()
-            };
-            
-            savedPoints.push(point);
-            updateSavedPointsList();
-            savePointsToLocalStorage();
-            
-            // ایجاد نشانگر برای نقطه ذخیره شده
-            createSavedPointMarker(point);
-            
-            alert(`✅ نقطه "${pointName}" ذخیره شد.`);
-        }
-        
-        // ==================== ایجاد نشانگر برای نقطه ذخیره شده ====================
-        function createSavedPointMarker(point) {
-            const latLon = convertUTMToLatLon(point.zone, point.easting, point.northing);
-            const coords = sphericalToCartesian(
-                latLon.lat * Math.PI / 180,
-                latLon.lon * Math.PI / 180,
-                5.05  // کمی بالاتر از سطح زمین
-            );
-            
-            const geometry = new THREE.SphereGeometry(0.1, 8, 8);
-            const material = new THREE.MeshBasicMaterial({ 
-                color: point.color,
-                transparent: true,
-                opacity: 0.8
-            });
-            
-            const marker = new THREE.Mesh(geometry, material);
-            marker.position.copy(coords);
-            marker.userData = { type: 'saved-point', pointId: point.id };
-            
-            // اضافه کردن خط به مرکز
-            const lineGeometry = new THREE.CylinderGeometry(0.01, 0.01, 0.2, 8);
-            const lineMaterial = new THREE.MeshBasicMaterial({ color: point.color });
-            const line = new THREE.Mesh(lineGeometry, lineMaterial);
-            line.position.y = -0.1;
-            marker.add(line);
-            
-            markerGroup.add(marker);
-            
-            // به‌روزرسانی تعداد نقاط
-            document.getElementById('pointCount').textContent = savedPoints.length;
-        }
-        
-        // ==================== به‌روزرسانی لیست نقاط ذخیره شده ====================
-        function updateSavedPointsList() {
-            const listElement = document.getElementById('savedPointsList');
-            
-            if (savedPoints.length === 0) {
-                listElement.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 20px;">هیچ نقطه‌ای ذخیره نشده است</div>';
-                return;
-            }
-            
-            listElement.innerHTML = savedPoints.map(point => `
-                <div class="saved-item" onclick="loadPoint(${point.id})">
-                    <div class="saved-item-header">
-                        <div class="saved-item-name" style="color: ${point.color}">📍 ${point.name}</div>
-                        <button class="saved-item-delete" onclick="deletePoint(${point.id}); event.stopPropagation();">🗑️</button>
-                    </div>
-                    <div class="saved-item-coords">
-                        ${point.zone} | E: ${point.easting.toLocaleString()} | N: ${point.northing.toLocaleString()}<br>
-                        <small>${point.timestamp}</small>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        // ==================== بارگذاری نقطه ذخیره شده ====================
-        function loadPoint(pointId) {
-            const point = savedPoints.find(p => p.id === pointId);
-            
-            if (!point) {
-                alert('نقطه مورد نظر یافت نشد.');
-                return;
-            }
-            
-            document.getElementById('zone').value = point.zone;
-            document.getElementById('easting').value = point.easting;
-            document.getElementById('northing').value = point.northing;
-            
-            plotPoint();
-        }
-        
-        // ==================== حذف نقطه ذخیره شده ====================
-        function deletePoint(pointId) {
-            if (!confirm('آیا از حذف این نقطه مطمئن هستید؟')) return;
-            
-            savedPoints = savedPoints.filter(p => p.id !== pointId);
-            
-            // حذف نشانگر از صحنه
-            markerGroup.children.forEach((child, index) => {
-                if (child.userData && child.userData.pointId === pointId) {
-                    markerGroup.remove(child);
-                }
-            });
-            
-            updateSavedPointsList();
-            savePointsToLocalStorage();
-            document.getElementById('pointCount').textContent = savedPoints.length;
-        }
-        
-        // ==================== ذخیره در localStorage ====================
-        function savePointsToLocalStorage() {
-            try {
-                localStorage.setItem('utmPoints', JSON.stringify(savedPoints));
-            } catch (e) {
-                console.error('خطا در ذخیره نقاط:', e);
-            }
-        }
-        
-        // ==================== بارگذاری از localStorage ====================
-        function loadSavedPoints() {
-            try {
-                const saved = localStorage.getItem('utmPoints');
-                if (saved) {
-                    savedPoints = JSON.parse(saved);
-                    updateSavedPointsList();
-                    
-                    // ایجاد نشانگرها برای نقاط ذخیره شده
-                    savedPoints.forEach(point => {
-                        createSavedPointMarker(point);
+                if (line.length > 0) {
+                    utmGridLines.push({
+                        coords: line,
+                        color: utmColor,
+                        type: 'utm_meridian'
                     });
                 }
-            } catch (e) {
-                console.error('خطا در بارگذاری نقاط:', e);
-            }
-        }
-        
-        // ==================== خروجی نقاط ====================
-        function exportPoints() {
-            if (savedPoints.length === 0) {
-                alert('هیچ نقطه‌ای برای خروجی وجود ندارد.');
-                return;
             }
             
-            const csvContent = [
-                ['Zone', 'Easting', 'Northing', 'Name', 'Timestamp'].join(','),
-                ...savedPoints.map(p => [p.zone, p.easting, p.northing, p.name, p.timestamp].join(','))
-            ].join('\n');
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `utm_points_${new Date().toISOString().slice(0,10)}.csv`);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-        
-        // ==================== هایلایت Zone UTM ====================
-        function highlightUTMZone(zoneNumber) {
-            // حذف هایلایت‌های قبلی
-            scene.children.forEach(child => {
-                if (child.userData && child.userData.isZoneHighlight) {
-                    scene.remove(child);
-                }
-            });
-            
-            // محاسبه محدوده zone
-            const zoneCenter = (zoneNumber * 6) - 183 + 3;
-            const zoneHalfWidth = 3;
-            
-            // ایجاد هایلایت
-            const geometry = new THREE.RingGeometry(5.02, 5.03, 64);
-            const material = new THREE.MeshBasicMaterial({
-                color: 0xffff00,
-                side: THREE.DoubleSide,
-                transparent: true,
-                opacity: 0.2
-            });
-            
-            const zoneRing = new THREE.Mesh(geometry, material);
-            zoneRing.rotation.x = Math.PI / 2;
-            zoneRing.userData = { isZoneHighlight: true, zone: zoneNumber };
-            scene.add(zoneRing);
-            
-            // اضافه کردن متن zone
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = 256;
-            canvas.height = 128;
-            
-            context.fillStyle = 'rgba(255, 255, 0, 0.8)';
-            context.font = 'bold 60px Arial';
-            context.textAlign = 'center';
-            context.fillText(`Zone ${zoneNumber}`, 128, 80);
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            const spriteMaterial = new THREE.SpriteMaterial({ 
-                map: texture,
-                transparent: true
-            });
-            
-            const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.position.set(0, 0, 5.1);
-            sprite.scale.set(2, 1, 1);
-            sprite.userData = { isZoneHighlight: true };
-            scene.add(sprite);
-        }
-        
-        // ==================== کنترل شبکه ====================
-        function toggleGrid(type) {
-            activeGridType = type;
-            
-            // به‌روزرسانی دکمه‌ها
-            document.querySelectorAll('.grid-option').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // نمایش/پنهان کردن شبکه‌ها
-            switch(type) {
-                case 'utm':
-                    utmGrid.visible = true;
-                    geoGrid.visible = false;
-                    break;
-                case 'geo':
-                    utmGrid.visible = false;
-                    geoGrid.visible = true;
-                    break;
-                case 'none':
-                    utmGrid.visible = false;
-                    geoGrid.visible = false;
-                    break;
-            }
-            
-            document.getElementById('activeGrid').textContent = 
-                type === 'utm' ? 'UTM' : type === 'geo' ? 'جغرافیایی' : 'بدون شبکه';
-        }
-        
-        // ==================== به‌روزرسانی ضخامت شبکه ====================
-        function updateGridThickness(thickness) {
-            const value = parseFloat(thickness);
-            [utmGrid, geoGrid].forEach(grid => {
-                grid.children.forEach(line => {
-                    line.material.linewidth = value;
-                });
-            });
-        }
-        
-        // ==================== به‌روزرسانی شفافیت شبکه ====================
-        function updateGridOpacity(opacity) {
-            const value = parseFloat(opacity) / 100;
-            [utmGrid, geoGrid].forEach(grid => {
-                grid.children.forEach(line => {
-                    line.material.opacity = value * 0.5;
-                });
-            });
-        }
-        
-        // ==================== نقاط نمونه ====================
-        function setSample(name, zone, easting, northing) {
-            document.getElementById('zone').value = zone;
-            document.getElementById('easting').value = easting;
-            document.getElementById('northing').value = northing;
-            
-            plotPoint();
-            
-            // نمایش پیام
-            const coordsDisplay = document.getElementById('coordinates');
-            const message = document.createElement('div');
-            message.style.color = '#27ae60';
-            message.style.fontSize = '0.9rem';
-            message.style.marginTop = '10px';
-            message.textContent = `نمایش نقطه نمونه: ${name}`;
-            
-            setTimeout(() => {
-                if (coordsDisplay.contains(message)) {
-                    coordsDisplay.removeChild(message);
-                }
-            }, 3000);
-        }
-        
-        // ==================== کنترل‌های دوربین ====================
-        function rotateLeft() {
-            earth.rotation.y += 0.1;
-        }
-        
-        function rotateRight() {
-            earth.rotation.y -= 0.1;
-        }
-        
-        function zoomIn() {
-            camera.position.z = Math.max(5, camera.position.z - 1);
-        }
-        
-        function zoomOut() {
-            camera.position.z = Math.min(30, camera.position.z + 1);
-        }
-        
-        function resetView() {
-            camera.position.set(0, 0, 15);
-            camera.lookAt(0, 0, 0);
-            earth.rotation.y = -Math.PI / 2;
-            controls.reset();
-        }
-        
-        function toggleAutoRotate() {
-            autoRotate = !autoRotate;
-            event.target.textContent = autoRotate ? '⏸️' : '▶️';
-        }
-        
-        // ==================== تمرکز روی نقطه ====================
-        function focusOnPoint(position) {
-            controls.target.copy(position);
-            camera.position.copy(position.clone().add(new THREE.Vector3(0, 0, 10)));
-            controls.update();
-        }
-        
-        // ==================== نمایش همه نقاط ====================
-        function showAllPoints() {
-            if (savedPoints.length === 0) {
-                alert('هیچ نقطه ذخیره شده‌ای وجود ندارد.');
-                return;
-            }
-            
-            // محاسبه مرکز همه نقاط
-            const positions = savedPoints.map(point => {
-                const latLon = convertUTMToLatLon(point.zone, point.easting, point.northing);
-                return sphericalToCartesian(
-                    latLon.lat * Math.PI / 180,
-                    latLon.lon * Math.PI / 180
-                );
-            });
-            
-            // محاسبه میانگین
-            const center = positions.reduce((sum, pos) => sum.add(pos), new THREE.Vector3())
-                .divideScalar(positions.length);
-            
-            // تمرکز روی مرکز
-            focusOnPoint(center);
-        }
-        
-        // ==================== وارد کردن چند نقطه ====================
-        function showImportModal() {
-            document.getElementById('multiPointModal').style.display = 'flex';
-        }
-        
-        function closeModal() {
-            document.getElementById('multiPointModal').style.display = 'none';
-        }
-        
-        function importPoints() {
-            const input = document.getElementById('multiPointsInput').value;
-            const lines = input.trim().split('\n');
-            
-            let importedCount = 0;
-            
-            lines.forEach((line, index) => {
-                const parts = line.trim().split(',');
-                if (parts.length >= 3) {
-                    const zone = parts[0].trim();
-                    const easting = parseFloat(parts[1]);
-                    const northing = parseFloat(parts[2]);
-                    const name = parts[3] || `نقطه ${index + 1}`;
-                    
-                    if (zone && !isNaN(easting) && !isNaN(northing)) {
-                        const point = {
-                            id: Date.now() + index,
-                            name,
-                            zone,
-                            easting,
-                            northing,
-                            timestamp: new Date().toLocaleString('fa-IR'),
-                            color: getRandomColor()
-                        };
-                        
-                        savedPoints.push(point);
-                        createSavedPointMarker(point);
-                        importedCount++;
+            // خطوط عرضی UTM (هر 8 درجه) - محدود به 180± درجه
+            for (let lat = -80; lat <= 84; lat += 8) {
+                const line = [];
+                for (let lon = -180; lon <= 180; lon += 2) {
+                    // اطمینان از محدوده معتبر
+                    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+                        line.push([lat, lon]);
                     }
                 }
-            });
-            
-            if (importedCount > 0) {
-                updateSavedPointsList();
-                savePointsToLocalStorage();
-                alert(`✅ ${importedCount} نقطه با موفقیت وارد شد.`);
-                closeModal();
-            } else {
-                alert('❌ هیچ نقطه معتبری یافت نشد.');
-            }
-        }
-        
-        // ==================== تنظیم رویدادها ====================
-        function setupEventListeners() {
-            // تغییر اندازه پنجره
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-            
-            // دابل کلیک برای زوم
-            renderer.domElement.addEventListener('dblclick', (event) => {
-                event.preventDefault();
-                
-                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-                
-                raycaster.setFromCamera(mouse, camera);
-                
-                const intersects = raycaster.intersectObject(earth);
-                
-                if (intersects.length > 0) {
-                    const point = intersects[0].point;
-                    focusOnPoint(point);
+                if (line.length > 0) {
+                    utmGridLines.push({
+                        coords: line,
+                        color: utmColor,
+                        type: 'utm_parallel'
+                    });
                 }
+            }
+            
+            // مرزهای اصلی UTM (80°S و 84°N)
+            const southBoundary = [];
+            const northBoundary = [];
+            
+            for (let lon = -180; lon <= 180; lon += 2) {
+                southBoundary.push([-80, lon]);
+                northBoundary.push([84, lon]);
+            }
+            
+            utmGridLines.push({
+                coords: southBoundary,
+                color: '#ffcc80',
+                type: 'utm_boundary_south'
             });
             
-            // کلیک روی زمین برای نمایش مختصات
-            renderer.domElement.addEventListener('click', (event) => {
-                if (event.target !== renderer.domElement) return;
-                
-                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-                
-                raycaster.setFromCamera(mouse, camera);
-                
-                const intersects = raycaster.intersectObject(earth);
-                
-                if (intersects.length > 0) {
-                    const point = intersects[0].point;
-                    
-                    // تبدیل مختصات کارتزین به کروی
-                    const spherical = cartesianToSpherical(point);
-                    
-                    // نمایش مختصات
-                    document.getElementById('coord-lat').textContent = spherical.lat.toFixed(6) + '°';
-                    document.getElementById('coord-lon').textContent = spherical.lon.toFixed(6) + '°';
-                    
-                    // تخمین zone
-                    const zone = Math.floor((spherical.lon + 180) / 6) + 1;
-                    const hemisphere = spherical.lat >= 0 ? 'N' : 'S';
-                    document.getElementById('coord-zone').textContent = zone + hemisphere;
+            utmGridLines.push({
+                coords: northBoundary,
+                color: '#ffcc80',
+                type: 'utm_boundary_north'
+            });
+            
+            return utmGridLines;
+        }
+        
+        // تابع برای ایجاد گرید جغرافیایی سنتی
+        function createGeographicGrid() {
+            const geoGridLines = [];
+            const geoColor = '#ff5252'; // قرمز
+            
+            // خطوط طول جغرافیایی (هر 15 درجه)
+            for (let lon = -180; lon <= 180; lon += 15) {
+                const line = [];
+                for (let lat = -90; lat <= 90; lat += 2) {
+                    // اطمینان از محدوده معتبر
+                    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+                        line.push([lat, lon]);
+                    }
                 }
-            });
-            
-            // میانبرهای صفحه کلید
-            window.addEventListener('keydown', (event) => {
-                switch(event.key) {
-                    case 'ArrowLeft':
-                        rotateLeft();
-                        break;
-                    case 'ArrowRight':
-                        rotateRight();
-                        break;
-                    case '+':
-                    case '=':
-                        zoomIn();
-                        break;
-                    case '-':
-                    case '_':
-                        zoomOut();
-                        break;
-                    case 'r':
-                    case 'R':
-                        resetView();
-                        break;
-                    case ' ':
-                        toggleAutoRotate();
-                        break;
-                    case 'Escape':
-                        resetView();
-                        break;
+                if (line.length > 0) {
+                    geoGridLines.push({
+                        coords: line,
+                        color: geoColor,
+                        type: 'geo_meridian'
+                    });
                 }
+            }
+            
+            // خطوط عرض جغرافیایی (هر 15 درجه)
+            for (let lat = -90; lat <= 90; lat += 15) {
+                const line = [];
+                for (let lon = -180; lon <= 180; lon += 2) {
+                    // اطمینان از محدوده معتبر
+                    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+                        line.push([lat, lon]);
+                    }
+                }
+                if (line.length > 0) {
+                    geoGridLines.push({
+                        coords: line,
+                        color: geoColor,
+                        type: 'geo_parallel'
+                    });
+                }
+            }
+            
+            // خط استوا با رنگ متفاوت
+            const equator = [];
+            for (let lon = -180; lon <= 180; lon += 2) {
+                equator.push([0, lon]);
+            }
+            geoGridLines.push({
+                coords: equator,
+                color: '#ffcc80',
+                type: 'equator'
             });
-        }
-        
-        // ==================== تبدیل کارتزین به کروی ====================
-        function cartesianToSpherical(position) {
-            const radius = Math.sqrt(
-                position.x * position.x + 
-                position.y * position.y + 
-                position.z * position.z
-            );
             
-            const lat = Math.asin(position.y / radius) * 180 / Math.PI;
-            const lon = Math.atan2(position.z, -position.x) * 180 / Math.PI;
-            
-            return { lat, lon };
-        }
-        
-        // ==================== تابع کمکی برای رنگ تصادفی ====================
-        function getRandomColor() {
-            const colors = [
-                '#e74c3c', '#3498db', '#2ecc71', '#f39c12',
-                '#9b59b6', '#1abc9c', '#d35400', '#c0392b',
-                '#2980b9', '#27ae60', '#f1c40f', '#8e44ad'
-            ];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-        
-        // ==================== پنهان/نمایش پنل ====================
-        function togglePanel() {
-            const panel = document.getElementById('inputPanel');
-            const btn = event.target;
-            
-            if (panel.style.transform === 'translateX(400px)') {
-                panel.style.transform = 'translateX(0)';
-                btn.textContent = '−';
-            } else {
-                panel.style.transform = 'translateX(400px)';
-                btn.textContent = '+';
+            // نصف‌النهار مبدأ با رنگ متفاوت
+            const primeMeridian = [];
+            for (let lat = -90; lat <= 90; lat += 2) {
+                primeMeridian.push([lat, 0]);
             }
+            geoGridLines.push({
+                coords: primeMeridian,
+                color: '#ffcc80',
+                type: 'prime_meridian'
+            });
+            
+            return geoGridLines;
         }
         
-        // ==================== هایلایت Zone فعلی ====================
-        function highlightCurrentZone() {
-            const zone = document.getElementById('zone').value;
-            const zoneNum = parseInt(zone);
+        // تابع به‌روزرسانی گرید با خطوط ثابت (بدون انیمیشن)
+        function updateGrids() {
+            let allPaths = [];
             
-            if (!isNaN(zoneNum)) {
-                highlightUTMZone(zoneNum);
-            } else {
-                alert('لطفا ابتدا یک Zone معتبر وارد کنید.');
-            }
-        }
-        
-        // ==================== انیمیشن ====================
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            if (autoRotate && !controls.enabled) {
-                earth.rotation.y += 0.001;
+            if (utmGridEnabled) {
+                const utmGrid = createUTMGrid();
+                // اطمینان از معتبر بودن تمام نقاط
+                const validUTMGrid = utmGrid.filter(path => {
+                    return path.coords.every(coord => {
+                        const [lat, lon] = coord;
+                        return !isNaN(lat) && !isNaN(lon) && 
+                               lat >= -90 && lat <= 90 && 
+                               lon >= -180 && lon <= 180;
+                    });
+                });
+                allPaths = allPaths.concat(validUTMGrid);
             }
             
-            controls.update();
-            
-            // انیمیشن نشانگر
-            if (marker.visible) {
-                marker.rotation.y += 0.01;
-                marker.scale.x = 1 + Math.sin(Date.now() * 0.005) * 0.1;
-                marker.scale.y = 1 + Math.sin(Date.now() * 0.005) * 0.1;
-                marker.scale.z = 1 + Math.sin(Date.now() * 0.005) * 0.1;
+            if (geoGridEnabled) {
+                const geoGrid = createGeographicGrid();
+                // اطمینان از معتبر بودن تمام نقاط
+                const validGeoGrid = geoGrid.filter(path => {
+                    return path.coords.every(coord => {
+                        const [lat, lon] = coord;
+                        return !isNaN(lat) && !isNaN(lon) && 
+                               lat >= -90 && lat <= 90 && 
+                               lon >= -180 && lon <= 180;
+                    });
+                });
+                allPaths = allPaths.concat(validGeoGrid);
             }
             
-            renderer.render(scene, camera);
+            // اعمال گرید به کره با خطوط ثابت (بدون dash و انیمیشن)
+            globe.pathsData(allPaths)
+                .pathPoints(d => d.coords)
+                .pathColor(d => d.color)
+                .pathStroke(0.7)  // خطوط نازک‌تر برای وضوح بیشتر
+                .pathDashLength(0)  // بدون dash (خط پیوسته)
+                .pathDashGap(0)     // بدون فاصله
+                .pathDashAnimateTime(0);  // بدون انیمیشن
+            
+            // به‌روزرسانی وضعیت
+            document.getElementById('utm-status').textContent = `UTM: ${utmGridEnabled ? 'روشن' : 'خاموش'}`;
+            document.getElementById('geo-status').textContent = `Geo: ${geoGridEnabled ? 'روشن' : 'خاموش'}`;
+            
+            // به‌روزرسانی ظاهر دکمه‌ها
+            document.getElementById('toggle-utm-grid').className = utmGridEnabled ? 'active' : '';
+            document.getElementById('toggle-geo-grid').className = geoGridEnabled ? 'active' : '';
         }
         
-        // ==================== راه‌اندازی برنامه ====================
-        window.onload = function() {
-            // بارگذاری proj4
-            proj4.defs('WGS84', '+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees');
+        // کنترل‌های گرید
+        document.getElementById('toggle-utm-grid').addEventListener('click', function() {
+            utmGridEnabled = !utmGridEnabled;
+            updateGrids();
+        });
+        
+        document.getElementById('toggle-geo-grid').addEventListener('click', function() {
+            geoGridEnabled = !geoGridEnabled;
+            updateGrids();
+        });
+        
+        document.getElementById('toggle-both-grids').addEventListener('click', function() {
+            utmGridEnabled = true;
+            geoGridEnabled = true;
+            updateGrids();
+        });
+        
+        document.getElementById('clear-grids').addEventListener('click', function() {
+            utmGridEnabled = false;
+            geoGridEnabled = false;
+            updateGrids();
+        });
+        
+        // فعال کردن چرخش خودکار
+        globe.controls().autoRotate = true;
+        globe.controls().autoRotateSpeed = 0.6;
+        globe.controls().enableZoom = true;
+        
+        // کنترل‌های رابط کاربری
+        document.getElementById('rotation-speed').addEventListener('change', function(e) {
+            const speed = parseFloat(e.target.value);
+            globe.controls().autoRotate = speed > 0;
+            globe.controls().autoRotateSpeed = speed;
+        });
+        
+        document.getElementById('label-visibility').addEventListener('change', function(e) {
+            const visibility = e.target.value;
             
-            // تعریف projection های UTM
-            for (let zone = 1; zone <= 60; zone++) {
-                proj4.defs(`EPSG:326${zone}`, `+proj=utm +zone=${zone} +datum=WGS84 +units=m +no_defs`);
-                proj4.defs(`EPSG:327${zone}`, `+proj=utm +zone=${zone} +south +datum=WGS84 +units=m +no_defs`);
-            }
+            const updatedLabels = labels.map(label => {
+                const newLabel = {...label};
+                
+                if (visibility === 'all') {
+                    newLabel.text = `${label.zone}${label.letter}`;
+                    newLabel.size = 1.2;
+                } else if (visibility === 'zones') {
+                    newLabel.text = `${label.zone}`;
+                    newLabel.size = 1.5;
+                } else if (visibility === 'letters') {
+                    newLabel.text = `${label.letter}`;
+                    newLabel.size = 1.2;
+                } else {
+                    newLabel.text = '';
+                    newLabel.size = 0;
+                }
+                
+                return newLabel;
+            });
             
-            init();
+            globe.labelsData(updatedLabels);
+        });
+        
+        document.getElementById('reset-view').addEventListener('click', function() {
+            globe.pointOfView({ lat: 0, lng: 0, altitude: 2.5 }, 1000);
+            document.getElementById('selected-zone').textContent = 'روی یک زون کلیک کنید';
+        });
+        
+        // تنظیم نمای اولیه
+        globe.pointOfView({ lat: 20, lng: 50, altitude: 2 });
+        
+        // اطلاعات اولیه
+        document.getElementById('selected-zone').innerHTML = 
+            'روی هر یک از <span class="highlight">۱۲۰۰ زون UTM</span> کلیک کنید<br>' 
+           
             
-            // تنظیم تاریخچه
-            console.log(`
-            🌍 سیستم نمایش مختصات UTM
-            ==========================
-            نسخه: 2.0.0
-            قابلیت‌ها:
-            - تبدیل دقیق UTM به Lat/Lon با proj4
-            - شبکه‌های UTM و جغرافیایی
-            - ذخیره و بازیابی نقاط
-            - کنترل‌های پیشرفته دوربین
-            - نمایش چندین نقطه همزمان
-            - وارد کردن و خروجی CSV
-            ==========================
-            توسعه‌دهنده: سیستم GIS پیشرفته
-            `);
-        };
+        
+        // بارگذاری گریدها با تاخیر
+        setTimeout(() => {
+            updateGrids();
+        }, 500);
     </script>
 </body>
 </html>

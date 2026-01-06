@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>خانه ابزارهای فتوگرامتری و UTM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *{
+           font-family: "Vazirmatn", Tahoma, sans-serif;
+        }
+        body {
+            margin: 0;
+            font-family: "Vazirmatn", Tahoma, sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1rem;
+            opacity: 0.85;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            background: rgba(255,255,255,0.15);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-bottom: 15px;
+        }
+
+        .card a {
+            display: inline-block;
+            text-decoration: none;
+            color: #00eaff;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🛰️ ابزارهای عکس هوایی و سیستم UTM</h1>
+    <p>مجموعه ابزارهای محاسباتی، شبیه‌سازی و نمایش برای فتوگرامتری و GIS</p>
+</header>
+
+<div class="container">
+
+    <!-- Aerial Photo -->
+    <div class="card">
+        <h3>📐 محاسبه مساحت عکس هوایی</h3>
+        <p>محاسبه سطح پوشش عکس هوایی بر اساس ارتفاع، سنسور و لنز</p>
+        <a href="Aerial photo area.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>🗺️ نمایش پوشش عکس هوایی</h3>
+        <p>نمایش گرافیکی پوشش زمینی یک عکس هوایی</p>
+        <a href="Aerial photo overlay.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>🎥 انیمیشن ثبت عکس هوایی</h3>
+        <p>نمایش فرآیند برداشت تصاویر هوایی به‌صورت انیمیشنی</p>
+        <a href="Aerial photo recording animation.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>🔢 محاسبه تعداد عکس‌ها</h3>
+        <p>تخمین تعداد عکس مورد نیاز برای پوشش یک منطقه</p>
+        <a href="Calculate the number of photos.html">ورود به ابزار</a>
+    </div>
+
+    <!-- Overlap -->
+    <div class="card">
+        <h3>↔️ محاسبه پوشش طولی</h3>
+        <p>محاسبه همپوشانی طولی بین عکس‌ها</p>
+        <a href="Longitudinal overlap.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>↔️ شبیه‌ساز پوشش طولی</h3>
+        <p>شبیه‌سازی بصری همپوشانی طولی</p>
+        <a href="Longitudinal overlap simulator.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>↕️ محاسبه پوشش عرضی</h3>
+        <p>محاسبه همپوشانی عرضی پروازها</p>
+        <a href="Transverse overlap.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>↕️ شبیه‌ساز پوشش عرضی</h3>
+        <p>نمایش گرافیکی پوشش عرضی مسیرها</p>
+        <a href="Transverse overlap simulator.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>🧩 شبیه‌ساز همپوشانی</h3>
+        <p>تحلیل ترکیبی همپوشانی طولی و عرضی</p>
+        <a href="Overlay simulator.html">ورود به ابزار</a>
+    </div>
+
+    <!-- UTM -->
+    <div class="card">
+        <h3>🌍 محاسبه شماره زون UTM</h3>
+        <p>تشخیص زون UTM بر اساس طول جغرافیایی</p>
+        <a href="Calculate the zone number.HTML">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>🔄 تبدیل UTM ↔ Degree</h3>
+        <p>تبدیل مختصات UTM به درجه و بالعکس</p>
+        <a href="Convert UTM coordinates to degrees and vice versa.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>🧭 تبدیل DMS به DD</h3>
+        <p>تبدیل درجه-دقیقه-ثانیه به درجه اعشاری</p>
+        <a href="DMS to DD.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>📏 ابزار مقیاس</h3>
+        <p>محاسبه و تحلیل مقیاس عکس هوایی</p>
+        <a href="Scale tool.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>🧭 نمایش ۲بعدی UTM</h3>
+        <p>نمایش دوبعدی مختصات UTM</p>
+        <a href="UTM 2D.html">ورود به ابزار</a>
+    </div>
+
+    <div class="card">
+        <h3>🌐 نمایش ۳بعدی UTM</h3>
+        <p>نمایش سه‌بعدی مختصات UTM</p>
+        <a href="UTM 3D display.html">ورود به ابزار</a>
+    </div>
+
+</div>
+
+<footer>
+    © مجموعه ابزارهای فتوگرامتری | طراحی برای توسعه علمی و آموزشی
+</footer>
+
+</body>
+</html>
