@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>🌍 UTM Globe - Mobile</title>
+    <script src="https://unpkg.com/globe.gl"></script>
+    <style>
+        /* RESET کامل برای موبایل */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Vazirmatn", Tahoma, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+        
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            touch-action: none;
+            overscroll-behavior: none;
+        }
+        
+        body {
+            background: #000;
+            color: white;
+            font-size: 13px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* کره زمین - کل صفحه */
+        #globe-container {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            background: #000;
+        }
+        
+        /* 🎪 هدر موبایل */
+        .mobile-header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(0, 10, 30, 0.98) 0%, rgba(0, 10, 30, 0.85) 100%);
+            padding: 10px 12px 8px;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        .header-compact {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        
+        .title-area {
+            flex: 1;
+            text-align: right;
+        }
+        
+        .mobile-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #4fc3f7;
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+        
+        .mobile-subtitle {
+            font-size: 10px;
+            color: #bbdefb;
+            opacity: 0.9;
+        }
+        
+        .mobile-badge {
+            background: rgba(79, 195, 247, 0.2);
+            color: #4fc3f7;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+            border: 1px solid rgba(79, 195, 247, 0.4);
+        }
+        
+        /* 🎮 کنترل‌های لمسی */
+        .mobile-controls {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            z-index: 100;
+            background: linear-gradient(to top, rgba(0, 10, 30, 0.98) 0%, rgba(0, 10, 30, 0.85) 100%);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(79, 195, 247, 0.3);
+            box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.5);
+            padding: 12px;
+        }
+        
+        /* تب‌های کنترل */
+        .control-tabs {
+            display: flex;
+            background: rgba(0, 20, 40, 0.6);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 12px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 10px 8px;
+            background: transparent;
+            border: none;
+            color: #bbdefb;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .tab-btn.active {
+            background: rgba(79, 195, 247, 0.25);
+            color: #4fc3f7;
+            font-weight: 600;
+        }
+        
+        /* محتوای تب‌ها */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* گروه کنترل */
+        .control-group {
+            margin-bottom: 12px;
+        }
+        
+        .control-label {
+            display: block;
+            font-size: 11px;
+            color: #bbdefb;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        /* دکمه‌های موبایل */
+        .mobile-btn {
+            width: 100%;
+            padding: 13px 12px;
+            background: linear-gradient(135deg, rgba(32, 64, 128, 0.9) 0%, rgba(16, 32, 64, 0.9) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+            touch-action: manipulation;
+        }
+        
+        .mobile-btn:active {
+            transform: scale(0.97);
+            background: rgba(79, 195, 247, 0.9);
+        }
+        
+        .mobile-btn .icon {
+            font-size: 14px;
+        }
+        
+        /* سلکت موبایل */
+        .mobile-select {
+            width: 100%;
+            padding: 13px 40px 13px 12px;
+            background: linear-gradient(135deg, rgba(32, 64, 128, 0.9) 0%, rgba(16, 32, 64, 0.9) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 12px;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='%234fc3f7'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 12px center;
+            background-size: 14px;
+            direction: rtl;
+        }
+        
+        /* دکمه‌های سریع */
+        .quick-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        
+        .quick-btn {
+            padding: 11px 8px;
+            background: rgba(0, 20, 40, 0.7);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 8px;
+            color: #bbdefb;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .quick-btn:active {
+            background: rgba(79, 195, 247, 0.2);
+            border-color: #4fc3f7;
+        }
+        
+        /* وضعیت */
+        .status-indicator {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 20, 40, 0.6);
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin: 8px 0;
+            font-size: 11px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .status-dot.on {
+            background: #69f0ae;
+            box-shadow: 0 0 8px #69f0ae;
+        }
+        
+        .status-dot.off {
+            background: #ff5252;
+            opacity: 0.5;
+        }
+        
+        /* 📊 پنل اطلاعات موبایل */
+        .mobile-info-panel {
+            position: fixed;
+            top: 70px;
+            right: 12px;
+            left: 12px;
+            z-index: 90;
+            background: rgba(0, 10, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.4);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
+            font-size: 12px;
+            line-height: 1.5;
+            max-height: 160px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            display: none;
+        }
+        
+        .mobile-info-panel.active {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+        }
+        
+        .info-title {
+            color: #4fc3f7;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .close-info {
+            background: none;
+            border: none;
+            color: #ff5252;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        .zone-details {
+            color: #e3f2fd;
+        }
+        
+        .zone-highlight {
+            color: #ffcc80;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        /* 🎯 دکمه شناور */
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            left: 15px;
+            z-index: 80;
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #4fc3f7 0%, #1976d2 100%);
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(79, 195, 247, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .fab:active {
+            transform: scale(0.9);
+            box-shadow: 0 2px 10px rgba(79, 195, 247, 0.6);
+        }
+        
+        /* 🔔 اعلان */
+        .mobile-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 200;
+            background: rgba(0, 20, 40, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(79, 195, 247, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            display: none;
+            width: 85%;
+        }
+        
+        .mobile-toast.active {
+            display: block;
+            animation: fadeInUp 0.4s;
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0;
+                transform: translate(-50%, -40%);
+            }
+            to { 
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        /* 🎨 حالت‌های مختلف */
+        .mobile-btn.active-mode {
+            background: linear-gradient(135deg, rgba(105, 240, 174, 0.9) 0%, rgba(56, 142, 60, 0.9) 100%);
+            border-color: #69f0ae;
+        }
+        
+        .mobile-btn.performance-mode {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.9) 0%, rgba(245, 127, 23, 0.9) 100%);
+            border-color: #ffcc80;
+        }
+        
+        /* 📱 سازگاری با صفحه‌های مختلف */
+        @media (max-width: 320px) {
+            .mobile-header {
+                padding: 8px 10px 6px;
+            }
+            
+            .mobile-title {
+                font-size: 14px;
+            }
+            
+            .mobile-subtitle {
+                font-size: 9px;
+            }
+            
+            .mobile-controls {
+                padding: 10px;
+            }
+            
+            .mobile-btn {
+                padding: 12px 10px;
+                font-size: 12px;
+                min-height: 44px;
+            }
+            
+            .mobile-select {
+                padding: 12px 35px 12px 10px;
+                font-size: 12px;
+            }
+            
+            .mobile-info-panel {
+                top: 65px;
+                right: 10px;
+                left: 10px;
+                padding: 10px;
+                max-height: 140px;
+            }
+            
+            .fab {
+                width: 48px;
+                height: 48px;
+                bottom: 70px;
+                left: 12px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            /* در تبلت و دسکتاپ این کد نمایش داده نمی‌شود */
+            body::before {
+                content: "این نسخه فقط برای موبایل طراحی شده است. لطفا با موبایل وارد شوید.";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: #000;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 20px;
+                font-size: 18px;
+                z-index: 1000;
+            }
+        }
+        
+        /* 🔋 بهینه‌سازی باتری */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* 🌙 حالت تاریک */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #000;
+            }
+            
+            .mobile-header, .mobile-controls {
+                background: linear-gradient(to bottom, rgba(0, 5, 15, 0.98) 0%, rgba(0, 5, 15, 0.9) 100%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🌍 کره زمین -->
+    <div id="globe-container"></div>
+    
+    <!-- 📱 هدر موبایل -->
+    <div class="mobile-header">
+        <div class="header-compact">
+            <div class="title-area">
+                <div class="mobile-title">🌍 کره زمین UTM</div>
+                <div class="mobile-subtitle">1200 زون مختصاتی - نسخه موبایل</div>
+            </div>
+            <div class="mobile-badge" id="mobile-badge">📱 موبایل</div>
+        </div>
+    </div>
+    
+    <!-- 📊 پنل اطلاعات -->
+    <div class="mobile-info-panel" id="info-panel">
+        <div class="info-header">
+            <div class="info-title">📊 اطلاعات زون</div>
+            <button class="close-info" id="close-info">✕</button>
+        </div>
+        <div class="zone-details" id="zone-details">
+            روی یک زون کلیک کنید...
+        </div>
+    </div>
+    
+    <!-- 🎮 دکمه شناور -->
+    <button class="fab" id="fab-btn">
+        <i class="fas fa-bolt"></i>
+    </button>
+    
+    <!-- 🎪 کنترل‌های پایین -->
+    <div class="mobile-controls">
+        <!-- تب‌ها -->
+        <div class="control-tabs">
+            <button class="tab-btn active" data-tab="controls">🎮 کنترل</button>
+            <button class="tab-btn" data-tab="grid">🎯 گرید</button>
+            <button class="tab-btn" data-tab="view">👁️ نمایش</button>
+        </div>
+        
+        <!-- تب کنترل‌ها -->
+        <div class="tab-content active" id="tab-controls">
+            <div class="control-group">
+                <label class="control-label">سرعت چرخش:</label>
+                <select class="mobile-select" id="rotation-speed">
+                    <option value="0">⛔ بدون چرخش</option>
+                    <option value="0.15" selected>🐌 بسیار کند</option>
+                    <option value="0.3">🚶‍♂️ کند</option>
+                    <option value="0.6">🏃‍♂️ متوسط</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">حالت نمایش:</label>
+                <div class="quick-buttons">
+                    <button class="quick-btn" data-mode="light">🔋 سبک</button>
+                    <button class="quick-btn" data-mode="normal">🚀 عادی</button>
+                    <button class="quick-btn" data-mode="detail">🔍 جزئیات</button>
+                    <button class="quick-btn" id="reset-view">🔄 بازنشانی</button>
+                </div>
+            </div>
+            
+            <div class="status-indicator">
+                <div class="status-item">
+                    <span class="status-dot on" id="fps-dot"></span>
+                    <span>FPS: <span id="fps-counter">60</span></span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot" id="labels-dot"></span>
+                    <span>برچسب‌ها: <span id="labels-count">0</span></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- تب گرید -->
+        <div class="tab-content" id="tab-grid">
+            <div class="control-group">
+                <label class="control-label">نوع گرید:</label>
+                <button class="mobile-btn" id="toggle-utm-grid">
+                    <span class="icon">📐</span>
+                    UTM Grid
+                </button>
+                <button class="mobile-btn" id="toggle-geo-grid">
+                    <span class="icon">🌐</span>
+                    Geographic Grid
+                </button>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">کنترل سریع:</label>
+                <div class="quick-buttons">
+                    <button class="quick-btn" id="grid-both">هر دو</button>
+                    <button class="quick-btn" id="grid-none">هیچکدام</button>
+                </div>
+            </div>
+            
+            <div class="status-indicator">
+                <div class="status-item">
+                    <span class="status-dot off" id="utm-dot"></span>
+                    <span>UTM: <span id="utm-status">خاموش</span></span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot off" id="geo-dot"></span>
+                    <span>GEO: <span id="geo-status">خاموش</span></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- تب نمایش -->
+        <div class="tab-content" id="tab-view">
+            <div class="control-group">
+                <label class="control-label">برچسب‌ها:</label>
+                <select class="mobile-select" id="label-visibility">
+                    <option value="mobile-optimized" selected>📱 بهینه موبایل</option>
+                    <option value="numbers">🔢 فقط اعداد</option>
+                    <option value="none">👻 بدون برچسب</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">تنظیمات:</label>
+                <button class="mobile-btn" id="fullscreen-btn">
+                    <span class="icon">📱</span>
+                    حالت تمام صفحه
+                </button>
+                <button class="mobile-btn performance-mode" id="performance-btn">
+                    <span class="icon">⚡</span>
+                    بهینه‌سازی عملکرد
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 🔔 اعلان -->
+    <div class="mobile-toast" id="mobile-toast">
+        <div style="font-size: 24px; margin-bottom: 10px;">🌍</div>
+        <div id="toast-message">لطفا صبر کنید...</div>
+    </div>
+
+    <script>
+        // 📱 تشخیص قطعی موبایل
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   (window.innerWidth <= 768 && window.innerHeight <= 1024);
+        }
+        
+        // اگر موبایل نیست، پیام نمایش بده
+        if (!isMobileDevice()) {
+            document.body.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: linear-gradient(135deg, #0c0c2e 0%, #1a1a3e 100%);
+                    color: white;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                    padding: 20px;
+                    font-family: 'Vazirmatn', Tahoma, sans-serif;
+                ">
+                    <div style="font-size: 40px; margin-bottom: 20px;">📱</div>
+                    <h1 style="font-size: 20px; margin-bottom: 15px; color: #4fc3f7;">این نسخه فقط برای موبایل طراحی شده است!</h1>
+                    <p style="margin-bottom: 10px; opacity: 0.9;">لطفا با تلفن همراه خود وارد شوید.</p>
+                    <p style="font-size: 12px; opacity: 0.7; margin-top: 20px;">
+                        تشخیص مرورگر: ${navigator.userAgent}<br>
+                        سایز صفحه: ${window.innerWidth} × ${window.innerHeight}px
+                    </p>
+                </div>
+            `;
+            throw new Error('این برنامه فقط بر روی موبایل اجرا می‌شود');
+        }
+        
+        // 🎯 تنظیمات مخصوص موبایل
+        const MOBILE_CONFIG = {
+            maxLabels: 60, // حداکثر برچسب در موبایل
+            gridDensity: 0.3, // تراکم گرید
+            labelSize: 0.5, // سایز برچسب‌ها
+            performanceMode: true // همیشه فعال در موبایل
+        };
+        
+        // 📱 تنظیمات اولیه
+        let labels = [];
+        let utmGridEnabled = false;
+        let geoGridEnabled = false;
+        let currentTab = 'controls';
+        let performanceMode = true;
+        let fps = 60;
+        
+        // 🌍 ایجاد کره زمین مخصوص موبایل
+        const globe = Globe()
+            .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg') // تصویر تیره برای صرفه‌جویی در باتری
+            .backgroundImageUrl('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==') // تصویر سیاه یکپارچه
+            .showAtmosphere(false) // غیرفعال برای عملکرد بهتر
+            .showGraticules(false) // غیرفعال
+            .labelColor(() => '#4fc3f7') // رنگ آبی برای وضوح بیشتر
+            .labelAltitude(0.004)
+            .labelResolution(1) // کمترین رزولوشن
+            .labelDotRadius(0.1)
+            .labelSize(() => MOBILE_CONFIG.labelSize)
+            (document.getElementById('globe-container'));
+        
+        // تنظیمات کنترل برای موبایل
+        globe.controls().autoRotate = false;
+        globe.controls().enableZoom = true;
+        globe.controls().enablePan = true;
+        globe.controls().dampingFactor = 0.05;
+        globe.controls().rotateSpeed = 0.3;
+        globe.controls().zoomSpeed = 0.8;
+        
+        // 🎯 ایجاد برچسب‌های بهینه برای موبایل
+        function createMobileLabels() {
+            const labelsArray = [];
+            const letters = 'CDEFGHJKLMNPQRSTUVWX';
+            
+            // فقط زون‌های اصلی را نمایش بده
+            let count = 0;
+            for (let zone = 1; zone <= 60 && count < MOBILE_CONFIG.maxLabels; zone += 4) {
+                for (let bandIdx = 0; bandIdx < 20 && count < MOBILE_CONFIG.maxLabels; bandIdx += 4) {
+                    const letter = letters[bandIdx];
+                    const lonCenter = (zone - 30.5) * 6;
+                    const latCenter = bandIdx * 8 + 4 - 80;
+                    
+                    labelsArray.push({
+                        id: `${zone}${letter}`,
+                        lat: latCenter,
+                        lng: lonCenter,
+                        text: `${zone}`,
+                        zone: zone,
+                        letter: letter,
+                        latCenter: latCenter,
+                        lngCenter: lonCenter
+                    });
+                    
+                    count++;
+                }
+            }
+            
+            document.getElementById('labels-count').textContent = count;
+            document.getElementById('labels-dot').className = count > 0 ? 'status-dot on' : 'status-dot off';
+            
+            return labelsArray;
+        }
+        
+        // بارگذاری اولیه
+        labels = createMobileLabels();
+        globe.labelsData(labels)
+            .labelLat(d => d.lat)
+            .labelLng(d => d.lng)
+            .labelText(d => d.text)
+            .onLabelClick(label => {
+                // نمایش اطلاعات در پنل موبایل
+                document.getElementById('zone-details').innerHTML = `
+                    <span class="zone-highlight">زون ${label.id}</span>
+                    <div style="font-size: 11px; margin-bottom: 6px;">
+                        <div>📍 مختصات: ${label.lat.toFixed(1)}°N, ${label.lng.toFixed(1)}°E</div>
+                        <div>📐 اندازه: 6° طولی × 8° عرضی</div>
+                        <div>🔢 شماره: ${label.zone}</div>
+                        <div>🔠 حرف: ${label.letter}</div>
+                    </div>
+                    <div style="font-size: 10px; color: #69f0ae; margin-top: 8px;">
+                        UTM Zone ${label.zone}${label.letter}
+                    </div>
+                `;
+                
+                // نمایش پنل اطلاعات
+                document.getElementById('info-panel').classList.add('active');
+                
+                // هایلایت زون انتخاب شده
+                globe.labelsData(labels.map(l => 
+                    l.id === label.id ? { ...l, color: '#ffcc80', size: MOBILE_CONFIG.labelSize * 1.3 } : l
+                ));
+            });
+        
+        // 🎯 مدیریت تب‌ها
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // غیرفعال کردن همه تب‌ها
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // فعال کردن تب انتخابی
+                this.classList.add('active');
+                currentTab = this.dataset.tab;
+                document.getElementById(`tab-${currentTab}`).classList.add('active');
+            });
+        });
+        
+        // 🎮 کنترل چرخش
+        document.getElementById('rotation-speed').addEventListener('change', function(e) {
+            const speed = parseFloat(e.target.value);
+            globe.controls().autoRotate = speed > 0;
+            globe.controls().autoRotateSpeed = speed;
+        });
+        
+        // 🎯 کنترل گرید
+        function updateGrids() {
+            // در موبایل گرید ساده‌شده
+            const paths = [];
+            
+            if (utmGridEnabled) {
+                // گرید UTM ساده
+                for (let lon = -180; lon <= 180; lon += 30) {
+                    const line = [];
+                    for (let lat = -80; lat <= 84; lat += 10) {
+                        line.push([lat, lon]);
+                    }
+                    paths.push({ coords: line, color: '#69f0ae' });
+                }
+                
+                for (let lat = -80; lat <= 84; lat += 20) {
+                    const line = [];
+                    for (let lon = -180; lon <= 180; lon += 10) {
+                        line.push([lat, lon]);
+                    }
+                    paths.push({ coords: line, color: '#69f0ae' });
+                }
+            }
+            
+            globe.pathsData(paths)
+                .pathPoints(d => d.coords)
+                .pathColor(d => d.color)
+                .pathStroke(0.2)
+                .pathDashLength(0)
+                .pathDashGap(0);
+            
+            // به‌روزرسانی وضعیت
+            const utmStatus = utmGridEnabled ? 'روشن' : 'خاموش';
+            const geoStatus = geoGridEnabled ? 'روشن' : 'خاموش';
+            
+            document.getElementById('utm-status').textContent = utmStatus;
+            document.getElementById('geo-status').textContent = geoStatus;
+            document.getElementById('utm-dot').className = utmGridEnabled ? 'status-dot on' : 'status-dot off';
+            document.getElementById('geo-dot').className = geoGridEnabled ? 'status-dot on' : 'status-dot off';
+        }
+        
+        document.getElementById('toggle-utm-grid').addEventListener('click', function() {
+            utmGridEnabled = !utmGridEnabled;
+            updateGrids();
+            showToast(utmGridEnabled ? 'UTM Grid روشن شد' : 'UTM Grid خاموش شد');
+        });
+        
+        document.getElementById('toggle-geo-grid').addEventListener('click', function() {
+            geoGridEnabled = !geoGridEnabled;
+            updateGrids();
+            showToast(geoGridEnabled ? 'Geographic Grid روشن شد' : 'Geographic Grid خاموش شد');
+        });
+        
+        document.getElementById('grid-both').addEventListener('click', function() {
+            utmGridEnabled = true;
+            geoGridEnabled = true;
+            updateGrids();
+            showToast('هر دو گرید فعال شدند');
+        });
+        
+        document.getElementById('grid-none').addEventListener('click', function() {
+            utmGridEnabled = false;
+            geoGridEnabled = false;
+            updateGrids();
+            showToast('همه گریدها غیرفعال شدند');
+        });
+        
+        // 🎨 حالت‌های نمایش
+        document.querySelectorAll('[data-mode]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const mode = this.dataset.mode;
+                
+                switch(mode) {
+                    case 'light':
+                        globe.labelsData([]);
+                        globe.pathsData([]);
+                        showToast('حالت سبک فعال شد');
+                        break;
+                        
+                    case 'normal':
+                        labels = createMobileLabels();
+                        globe.labelsData(labels);
+                        updateGrids();
+                        showToast('حالت عادی فعال شد');
+                        break;
+                        
+                    case 'detail':
+                        // حالت جزئیات (برچسب‌های بیشتر)
+                        MOBILE_CONFIG.maxLabels = 120;
+                        labels = createMobileLabels();
+                        globe.labelsData(labels);
+                        showToast('حالت جزئیات فعال شد');
+                        break;
+                }
+            });
+        });
+        
+        // 🔄 بازنشانی نمای کره
+        document.getElementById('reset-view').addEventListener('click', function() {
+            globe.pointOfView({ lat: 25, lng: 55, altitude: 2.5 }, 800);
+            showToast('نمای کره بازنشانی شد');
+        });
+        
+        // 📱 کنترل برچسب‌ها
+        document.getElementById('label-visibility').addEventListener('change', function(e) {
+            const mode = e.target.value;
+            
+            switch(mode) {
+                case 'mobile-optimized':
+                    globe.labelsData(labels.map(l => ({ ...l, text: l.zone })));
+                    showToast('برچسب‌های بهینه موبایل');
+                    break;
+                    
+                case 'numbers':
+                    globe.labelsData(labels.map(l => ({ ...l, text: l.zone.toString() })));
+                    showToast('فقط اعداد نمایش داده می‌شوند');
+                    break;
+                    
+                case 'none':
+                    globe.labelsData([]);
+                    showToast('برچسب‌ها پنهان شدند');
+                    break;
+            }
+        });
+        
+        // ⚡ دکمه عملکرد
+        document.getElementById('performance-btn').addEventListener('click', function() {
+            performanceMode = !performanceMode;
+            
+            if (performanceMode) {
+                MOBILE_CONFIG.maxLabels = 60;
+                globe.labelSize(() => 0.5);
+                this.classList.add('performance-mode');
+                showToast('🔋 حالت عملکردی فعال شد');
+            } else {
+                MOBILE_CONFIG.maxLabels = 120;
+                globe.labelSize(() => 0.8);
+                this.classList.remove('performance-mode');
+                showToast('🚀 حالت عادی فعال شد');
+            }
+            
+            labels = createMobileLabels();
+            globe.labelsData(labels);
+        });
+        
+        // 📱 دکمه تمام صفحه
+        document.getElementById('fullscreen-btn').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('خطا در حالت تمام صفحه:', err);
+                });
+                this.innerHTML = '<span class="icon">📱</span> خروج از تمام صفحه';
+                showToast('حالت تمام صفحه فعال شد');
+            } else {
+                document.exitFullscreen();
+                this.innerHTML = '<span class="icon">📱</span> حالت تمام صفحه';
+                showToast('حالت تمام صفحه غیرفعال شد');
+            }
+        });
+        
+        // 🎪 دکمه شناور
+        document.getElementById('fab-btn').addEventListener('click', function() {
+            // تغییر سریع بین حالت‌ها
+            performanceMode = !performanceMode;
+            
+            if (performanceMode) {
+                this.innerHTML = '<i class="fas fa-bolt"></i>';
+                MOBILE_CONFIG.maxLabels = 40;
+                labels = createMobileLabels();
+                globe.labelsData(labels);
+                showToast('⚡ حالت سریع فعال شد');
+            } else {
+                this.innerHTML = '<i class="fas fa-globe"></i>';
+                MOBILE_CONFIG.maxLabels = 80;
+                labels = createMobileLabels();
+                globe.labelsData(labels);
+                showToast('🌍 حالت عادی فعال شد');
+            }
+        });
+        
+        // ✕ بستن پنل اطلاعات
+        document.getElementById('close-info').addEventListener('click', function() {
+            document.getElementById('info-panel').classList.remove('active');
+            // بازگرداندن رنگ برچسب‌ها
+            globe.labelsData(labels.map(l => ({ ...l, color: '#4fc3f7', size: MOBILE_CONFIG.labelSize })));
+        });
+        
+        // 🔔 نمایش اعلان
+        function showToast(message, duration = 2000) {
+            const toast = document.getElementById('mobile-toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('active');
+            
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, duration);
+        }
+        
+        // 📊 مانیتورینگ FPS
+        let frameCount = 0;
+        let lastTime = performance.now();
+        
+        function updateFPS() {
+            frameCount++;
+            const currentTime = performance.now();
+            
+            if (currentTime - lastTime >= 1000) {
+                fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                frameCount = 0;
+                lastTime = currentTime;
+                
+                document.getElementById('fps-counter').textContent = fps;
+                document.getElementById('fps-dot').className = 
+                    fps > 30 ? 'status-dot on' : fps > 15 ? 'status-dot on' : 'status-dot off';
+            }
+            
+            requestAnimationFrame(updateFPS);
+        }
+        
+        // 🎯 بارگذاری اولیه
+        setTimeout(() => {
+            // تنظیم نمای اولیه
+            globe.pointOfView({ lat: 25, lng: 55, altitude: 2.5 });
+            
+            // شروع مانیتورینگ FPS
+            updateFPS();
+            
+            // نمایش پیام خوش‌آمد
+            setTimeout(() => {
+                showToast('🌍 خوش آمدید! کره زمین UTM آماده است.');
+            }, 1000);
+            
+            console.log('✅ برنامه موبایل بارگذاری شد!');
+        }, 500);
+        
+        // 🚫 جلوگیری از رفتارهای ناخواسته موبایل
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+        
+        // 📱 مدیریت رویدادهای تمام صفحه
+        document.addEventListener('fullscreenchange', function() {
+            const badge = document.getElementById('mobile-badge');
+            if (document.fullscreenElement) {
+                badge.textContent = '📱 تمام صفحه';
+            } else {
+                badge.textContent = '📱 موبایل';
+            }
+        });
+    </script>
+</body>
+</html>

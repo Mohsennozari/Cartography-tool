@@ -121,7 +121,7 @@
         
         .info-panel {
             position: absolute;
-            top: 150px;
+            top: 250px;
             right: 10px;
             z-index: 10;
             background: rgba(0, 10, 30, 0.9);
@@ -134,6 +134,7 @@
             line-height: 1.5;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
+            height: 200px;
         }
         
         .info-title {
@@ -303,7 +304,7 @@
         }
         
         /* Small mobile devices (under 360px) */
-        @media (max-width: 360px) {
+        @media (max-width: 400px) {
             .controls {
                 padding: 12px;
                 gap: 10px;
@@ -368,7 +369,7 @@
     
     <div class="header">
         <h1>🌍 کره زمین با ۱۲۰۰ زون UTM</h1>
-        <div class="subtitle">سیستم مختصات جهانی مرکاتور</div>
+        <div class="subtitle">  اگر با موبایل وارد شده اید حالت دسکتاپ را فعال کنید</div>
         <div class="subtitle" id="device-info"></div>
     </div>
     
@@ -778,7 +779,7 @@
         
         // 🔧 اطلاعات اولیه
         document.getElementById('selected-zone').innerHTML = 
-            `روی هر یک از <span class="highlight">${labels.length} زون UTM</span> کلیک کنید<br>
+            `روی هر یک از <span class="highlight"> زون های UTM</span> کلیک کنید<br>
              <small>حالت فعلی: ${performanceMode ? 'عملکردی' : 'عادی'} | دستگاه: ${deviceInfo.isMobile ? 'موبایل' : deviceInfo.isTablet ? 'تبلت' : 'دسکتاپ'}</small>`;
         
         // 🔧 جلوگیری از اسکرول تصادفی در موبایل
