@@ -2,10 +2,10 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <title>کره زمین با ۱۲۰۰ زون UTM</title>
+    <title>کره زمین با ۱۲۰۰ زون UTM - نسخه هوشمند</title>
     <script src="https://unpkg.com/globe.gl"></script>
     <style>
         * {
@@ -13,6 +13,8 @@
             padding: 0;
             box-sizing: border-box;
             font-family: "Vazirmatn", Tahoma, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
         }
         
         body {
@@ -20,6 +22,7 @@
             background: linear-gradient(135deg, #0c0c2e 0%, #1a1a3e 100%);
             color: #fff;
             overflow: hidden;
+            touch-action: manipulation;
         }
         
         #globe-container {
@@ -28,99 +31,121 @@
             position: relative;
         }
         
+        /* Mobile-first طراحی ابتدا برای موبایل */
         .header {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            left: 20px;
+            top: 10px;
+            right: 10px;
+            left: 10px;
             text-align: center;
             z-index: 10;
-            background: rgba(0, 10, 30, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(64, 156, 255, 0.3);
-            max-width: 600px;
+            background: rgba(0, 10, 30, 0.85);
+            padding: 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(64, 156, 255, 0.4);
+            max-width: 95%;
             margin: 0 auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
         
         h1 {
-            font-size: 5px;
-            margin-bottom: 8px;
+            font-size: clamp(16px, 4vw, 24px);
+            margin-bottom: 6px;
             color: #4fc3f7;
+            font-weight: 700;
+            line-height: 1.3;
         }
         
         .subtitle {
-            font-size: 5px;
+            font-size: clamp(12px, 3vw, 16px);
             opacity: 0.9;
             margin-bottom: 5px;
+            line-height: 1.4;
         }
         
+        /* Controls for mobile first */
         .controls {
             position: absolute;
-            bottom: 30px;
-            left: 20px;
+            bottom: 15px;
+            left: 10px;
+            right: 10px;
             z-index: 10;
-            background: rgba(0, 10, 30, 0.7);
+            background: rgba(0, 10, 30, 0.85);
             padding: 15px;
-            border-radius: 10px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(64, 156, 255, 0.3);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(64, 156, 255, 0.4);
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-width: 300px;
+            gap: 12px;
+            max-width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
         
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 8px;
         }
         
         label {
-            font-size: 5px;
+            font-size: clamp(13px, 3.2vw, 15px);
             color: #bbdefb;
+            font-weight: 500;
         }
         
         button, select {
-            padding: 8px 12px;
-            background: rgba(32, 64, 128, 0.7);
+            padding: clamp(10px, 3vw, 14px) clamp(12px, 3vw, 16px);
+            background: linear-gradient(135deg, rgba(32, 64, 128, 0.9) 0%, rgba(16, 32, 64, 0.9) 100%);
             color: white;
-            border: 1px solid rgba(64, 156, 255, 0.5);
-            border-radius: 5px;
+            border: 2px solid rgba(64, 156, 255, 0.6);
+            border-radius: 8px;
             cursor: pointer;
-            font-size:5px;
+            font-size: clamp(13px, 3.2vw, 15px);
             transition: all 0.3s ease;
+            font-weight: 500;
+            min-height: 44px; /* حداقل ارتفاع برای لمس */
+        }
+        
+        button:active, select:active {
+            transform: scale(0.98);
         }
         
         button:hover, select:hover {
-            background: rgba(64, 128, 255, 0.7);
+            background: rgba(64, 128, 255, 0.9);
+            border-color: #4fc3f7;
         }
         
         .info-panel {
             position: absolute;
-            bottom: 30px;
-            right: 20px;
+            top: 150px;
+            right: 10px;
             z-index: 10;
-            background: rgba(0, 10, 30, 0.7);
+            background: rgba(0, 10, 30, 0.9);
             padding: 15px;
-            border-radius: 10px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(64, 156, 255, 0.3);
-            max-width: 320px;
-            font-size: 5px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(64, 156, 255, 0.4);
+            max-width: 92%;
+            font-size: clamp(12px, 3vw, 14px);
             line-height: 1.5;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
         
         .info-title {
             color: #4fc3f7;
             margin-bottom: 8px;
-            font-size: 5px;
+            font-size: clamp(14px, 3.5vw, 18px);
+            font-weight: 600;
         }
         
         .zone-info {
-            color: #bbdefb;
+            color: #e3f2fd;
+            line-height: 1.6;
         }
         
         .highlight {
@@ -131,64 +156,221 @@
         .grid-controls {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
         
         .grid-buttons {
             display: flex;
-            gap: 5px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         
         .grid-buttons button {
             flex: 1;
-            font-size: 5px;
-            padding: 6px 8px;
+            min-width: 45%;
+            font-size: clamp(12px, 3vw, 14px);
         }
         
         .grid-status {
             display: flex;
             justify-content: space-between;
-            margin-top: 5px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+            gap: 5px;
         }
         
         .grid-indicator {
-            font-size: 5px;
-            padding: 3px 8px;
-            border-radius: 3px;
+            font-size: clamp(11px, 2.8vw, 13px);
+            padding: 6px 10px;
+            border-radius: 6px;
             background: rgba(255, 255, 255, 0.1);
+            flex: 1;
+            text-align: center;
+            min-width: 120px;
         }
         
-        .utm-grid { color: #69f0ae; }
-        .geo-grid { color: #ff5252; }
+        .utm-grid { 
+            color: #69f0ae; 
+            background: rgba(105, 240, 174, 0.1) !important;
+        }
+        
+        .geo-grid { 
+            color: #ff5252; 
+            background: rgba(255, 82, 82, 0.1) !important;
+        }
         
         .active {
-            background: rgba(64, 128, 255, 0.9) !important;
+            background: linear-gradient(135deg, rgba(64, 128, 255, 0.95) 0%, rgba(32, 64, 255, 0.95) 100%) !important;
             border-color: #4fc3f7 !important;
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
         }
         
-        @media (max-width: 768px) {
-            .controls, .info-panel {
-                max-width: 250px;
-                font-size: 5px;
+        /* Loading indicator */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(12, 12, 46, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(79, 195, 247, 0.3);
+            border-top-color: #4fc3f7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Performance mode indicator */
+        .performance-mode {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 193, 7, 0.9);
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 100;
+            display: none;
+        }
+        
+        /* Tablet Styles (768px and up) */
+        @media (min-width: 768px) {
+            .header {
+                top: 20px;
+                right: 20px;
+                left: 20px;
+                padding: 15px;
+                max-width: 600px;
             }
             
-            .header {
-                padding: 10px;
-                font-size: 5px;
+            .controls {
+                bottom: 30px;
+                left: 20px;
+                right: auto;
+                max-width: 320px;
+            }
+            
+            .info-panel {
+                top: auto;
+                bottom: 30px;
+                right: 20px;
+                max-width: 350px;
+                top: 150px;
+            }
+            
+            .grid-buttons {
+                flex-wrap: nowrap;
+            }
+            
+            .grid-buttons button {
+                min-width: auto;
+            }
+        }
+        
+        /* Desktop Styles (1024px and up) */
+        @media (min-width: 1024px) {
+            .controls {
+                max-width: 350px;
+            }
+            
+            .info-panel {
+                max-width: 380px;
             }
             
             h1 {
-                font-size:5px;
+                font-size: 28px;
+            }
+            
+            .subtitle {
+                font-size: 18px;
+            }
+        }
+        
+        /* Small mobile devices (under 360px) */
+        @media (max-width: 360px) {
+            .controls {
+                padding: 12px;
+                gap: 10px;
             }
             
             .grid-buttons {
                 flex-direction: column;
             }
+            
+            .grid-buttons button {
+                min-width: 100%;
+            }
+            
+            .grid-status {
+                flex-direction: column;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #0a0a1a 0%, #151530 100%);
+            }
+            
+            .header, .controls, .info-panel {
+                background: rgba(5, 5, 15, 0.92);
+            }
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .spinner {
+                animation: none;
+            }
+        }
+        
+        /* High contrast mode */
+        @media (prefers-contrast: high) {
+            .header, .controls, .info-panel {
+                background: #000;
+                border: 2px solid #fff;
+            }
+            
+            button, select {
+                border: 2px solid #fff;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="performance-mode" id="performance-mode">
+        🔋 حالت عملکردی
+    </div>
+    
     <div id="globe-container"></div>
+    
+    <div class="header">
+        <h1>🌍 کره زمین با ۱۲۰۰ زون UTM</h1>
+        <div class="subtitle">سیستم مختصات جهانی مرکاتور</div>
+        <div class="subtitle" id="device-info"></div>
+    </div>
     
     <div class="controls">
         <div class="control-group">
@@ -204,7 +386,8 @@
         <div class="control-group">
             <label for="label-visibility">نمایش برچسب‌ها:</label>
             <select id="label-visibility">
-                <option value="all" selected>Grid Zone Designation</option>
+                <option value="optimized" selected>هوشمند (تطبیقی)</option>
+                <option value="all">همه (Grid Zone Designation)</option>
                 <option value="zones">Zone Number</option>
                 <option value="letters">Zone Letter Only</option>
                 <option value="none">None</option>
@@ -229,255 +412,225 @@
             </div>
         </div>
         
-        <button id="reset-view">بازنشانی نمای کره</button>
+        <button id="performance-toggle">🔋 بهینه‌سازی عملکرد</button>
+        <button id="reset-view">↺ بازنشانی نمای کره</button>
     </div>
     
     <div class="info-panel">
-        <div class="info-title">اطلاعات زون UTM</div>
+        <div class="info-title">📊 اطلاعات زون UTM</div>
         <div class="zone-info">
             <span id="selected-zone">روی یک زون کلیک کنید</span>
         </div>
     </div>
 
     <script>
-        // تنظیمات اولیه
-        const letters = 'CDEFGHJKLMNPQRSTUVWX';  // 20 حرف برای زون‌های عرضی (بدون I و O)
+        // 🔧 شناسایی دستگاه و قابلیت‌ها
+        const deviceInfo = {
+            isMobile: /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+            isTablet: /iPad|Android(?!.*Mobile)|Tablet/i.test(navigator.userAgent),
+            isDesktop: !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+            isTouch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+            screenWidth: window.innerWidth,
+            screenHeight: window.innerHeight,
+            pixelRatio: window.devicePixelRatio || 1,
+            memory: navigator.deviceMemory || 4, // حافظه RAM در گیگابایت
+            connection: navigator.connection ? {
+                effectiveType: navigator.connection.effectiveType,
+                saveData: navigator.connection.saveData
+            } : null
+        };
         
-        // ایجاد کره زمین
-        const globe = Globe()
-            .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-            .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-            .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-            .showAtmosphere(true)
-            .atmosphereColor('#3a228a')
-            .atmosphereAltitude(0.25)
-            .labelColor(() => '#ffffff')
-            .labelAltitude(0.01)
-            .labelResolution(3)
-            .labelDotRadius(0)
-            .labelSize(1.2)
-            (document.getElementById('globe-container'));
+        // نمایش اطلاعات دستگاه
+        document.getElementById('device-info').textContent = 
+            `دستگاه: ${deviceInfo.isMobile ? 'موبایل' : deviceInfo.isTablet ? 'تبلت' : 'دسکتاپ'} | رزولوشن: ${deviceInfo.screenWidth}×${deviceInfo.screenHeight}`;
         
-        // ایجاد ۱۲۰۰ زون (۶۰ طولی × ۲۰ عرضی)
-        const labels = [];
+        // حالت عملکردی پیش‌فرض
+        let performanceMode = deviceInfo.isMobile || deviceInfo.screenWidth < 768 || deviceInfo.memory < 4;
+        const performanceModeElement = document.getElementById('performance-mode');
         
-        for (let zone = 1; zone <= 60; zone++) {
-            for (let bandIdx = 0; bandIdx < 20; bandIdx++) {
-                const letter = letters[bandIdx];
-                
-                // محاسبه مرکز هر زون
-                const lonCenter = (zone - 30.5) * 6;  // مرکز زون ۱: -177° تا زون ۶۰: +177°
-                const latCenter = bandIdx * 8 + 4 - 80;  // از -80° تا +84°
-                
-                labels.push({
-                    id: `${zone}${letter}`,
-                    lat: latCenter,
-                    lng: lonCenter,
-                    text: `${zone}${letter}`,
-                    size: 1.2,
-                    color: '#ffffff',
-                    zone: zone,
-                    letter: letter,
-                    latCenter: latCenter,
-                    lngCenter: lonCenter,
-                    latRange: `${latCenter-4}° تا ${latCenter+4}°`,
-                    lngRange: `${lonCenter-3}° تا ${lonCenter+3}°`
-                });
-            }
+        if (performanceMode) {
+            performanceModeElement.style.display = 'block';
+            performanceModeElement.textContent = `🔋 حالت عملکردی (RAM: ${deviceInfo.memory}GB)`;
         }
         
-        // افزودن زون‌ها به کره
+        // تنظیمات اولیه با توجه به دستگاه
+        const letters = 'CDEFGHJKLMNPQRSTUVWX';
+        let labels = [];
+        
+        // 🔧 تابع هوشمند برای ایجاد برچسب‌ها با توجه به دستگاه
+        function createSmartLabels() {
+            const labelsArray = [];
+            
+            // در حالت عملکردی، برچسب‌های کمتری ایجاد می‌کنیم
+            const lonStep = performanceMode ? 12 : 6; // در موبایل: هر 12 درجه
+            const latStep = performanceMode ? 16 : 8;  // در موبایل: هر 16 درجه
+            
+            let zoneCount = 0;
+            
+            for (let zone = 1; zone <= 60; zone += (performanceMode ? 2 : 1)) {
+                for (let bandIdx = 0; bandIdx < 20; bandIdx += (performanceMode ? 2 : 1)) {
+                    const letter = letters[bandIdx];
+                    const lonCenter = (zone - 30.5) * 6;
+                    const latCenter = bandIdx * 8 + 4 - 80;
+                    
+                    labelsArray.push({
+                        id: `${zone}${letter}`,
+                        lat: latCenter,
+                        lng: lonCenter,
+                        text: performanceMode ? `${zone}` : `${zone}${letter}`,
+                        size: deviceInfo.isMobile ? 0.8 : 1.2,
+                        color: '#ffffff',
+                        zone: zone,
+                        letter: letter,
+                        latCenter: latCenter,
+                        lngCenter: lonCenter,
+                        latRange: `${latCenter-4}° تا ${latCenter+4}°`,
+                        lngRange: `${lonCenter-3}° تا ${lonCenter+3}°`,
+                        priority: zoneCount % 3 === 0 ? 'high' : 'normal'
+                    });
+                    
+                    zoneCount++;
+                }
+            }
+            
+            console.log(`ایجاد ${zoneCount} برچسب (حالت ${performanceMode ? 'عملکردی' : 'عادی'})`);
+            return labelsArray;
+        }
+        
+        // 🎯 ایجاد کره زمین با تنظیمات هوشمند
+        const globe = Globe()
+            .globeImageUrl(performanceMode 
+                ? '//unpkg.com/three-globe/example/img/earth-dark.jpg'  // تصویر سبک‌تر در موبایل
+                : '//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+            .bumpImageUrl(performanceMode ? null : '//unpkg.com/three-globe/example/img/earth-topology.png')  // در موبایل غیرفعال
+            .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+            .showAtmosphere(!performanceMode)  // در موبایل غیرفعال
+            .atmosphereColor('#3a228a')
+            .atmosphereAltitude(0.15)
+            .labelColor(() => '#ffffff')
+            .labelAltitude(0.01)
+            .labelResolution(performanceMode ? 2 : 3)
+            .labelDotRadius(performanceMode ? 0.2 : 0.3)
+            .labelSize(d => d.size * (deviceInfo.isMobile ? 0.7 : 1))
+            (document.getElementById('globe-container'));
+        
+        // بارگذاری اولیه برچسب‌ها
+        labels = createSmartLabels();
         globe.labelsData(labels)
             .labelLat(d => d.lat)
             .labelLng(d => d.lng)
             .labelText(d => d.text)
-            .labelSize(d => d.size)
-            .labelColor(d => d.color)
+            .labelSize(d => d.size * (deviceInfo.isMobile ? 0.8 : 1))
             .onLabelClick(label => {
-                // نمایش اطلاعات زون انتخاب شده
                 document.getElementById('selected-zone').innerHTML = 
                     `<span class="highlight">زون ${label.id}</span><br>
                      مختصات مرکز: ${label.lat.toFixed(2)}°N, ${label.lng.toFixed(2)}°E<br>
                      محدوده عرضی: ${label.latRange}<br>
                      محدوده طولی: ${label.lngRange}<br>
-                     <span style="color: #69f0ae; font-size: 5px;">سیستم UTM: 6° × 8°</span>`;
+                     <span style="color: #69f0ae; font-size: ${deviceInfo.isMobile ? '12px' : '14px'};">سیستم UTM: 6° × 8°</span>`;
             });
         
         // متغیرهای کنترل گرید
-        let utmGridEnabled = true;
+        let utmGridEnabled = !deviceInfo.isMobile; // در موبایل اولیه خاموش
         let geoGridEnabled = false;
         
-        // تابع برای ایجاد گرید UTM (هر 6 درجه طول، هر 8 درجه عرض)
-        function createUTMGrid() {
-            const utmGridLines = [];
-            const utmColor = '#69f0ae'; // سبز روشن
+        // 🔧 تابع هوشمند برای ایجاد گرید
+        function createSmartGrid(type) {
+            const gridLines = [];
+            const color = type === 'utm' ? '#69f0ae' : '#ff5252';
             
-            // خطوط طولی UTM (هر 6 درجه) - محدود به 90± درجه
-            for (let lon = -180; lon <= 180; lon += 6) {
-                const line = [];
-                for (let lat = -80; lat <= 84; lat += 2) {
-                    // اطمینان از محدوده معتبر
-                    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+            // تنظیمات هوشمند بر اساس دستگاه
+            const lonStep = performanceMode ? 
+                (type === 'utm' ? 12 : 30) :  // در موبایل: UTM هر 12 درجه، جغرافیایی هر 30 درجه
+                (type === 'utm' ? 6 : 15);    // در دسکتاپ: UTM هر 6 درجه، جغرافیایی هر 15 درجه
+            
+            const latStep = performanceMode ? 
+                (type === 'utm' ? 16 : 30) :  // در موبایل
+                (type === 'utm' ? 8 : 15);    // در دسکتاپ
+            
+            const pointDensity = performanceMode ? 4 : 2; // تراکم نقاط
+            
+            if (type === 'utm') {
+                // خطوط طولی UTM
+                for (let lon = -180; lon <= 180; lon += lonStep) {
+                    const line = [];
+                    for (let lat = -80; lat <= 84; lat += pointDensity) {
                         line.push([lat, lon]);
                     }
-                }
-                if (line.length > 0) {
-                    utmGridLines.push({
-                        coords: line,
-                        color: utmColor,
-                        type: 'utm_meridian'
-                    });
-                }
-            }
-            
-            // خطوط عرضی UTM (هر 8 درجه) - محدود به 180± درجه
-            for (let lat = -80; lat <= 84; lat += 8) {
-                const line = [];
-                for (let lon = -180; lon <= 180; lon += 2) {
-                    // اطمینان از محدوده معتبر
-                    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
-                        line.push([lat, lon]);
+                    if (line.length > 0) {
+                        gridLines.push({
+                            coords: line,
+                            color: color,
+                            type: 'utm_meridian'
+                        });
                     }
                 }
-                if (line.length > 0) {
-                    utmGridLines.push({
-                        coords: line,
-                        color: utmColor,
-                        type: 'utm_parallel'
-                    });
-                }
-            }
-            
-            // مرزهای اصلی UTM (80°S و 84°N)
-            const southBoundary = [];
-            const northBoundary = [];
-            
-            for (let lon = -180; lon <= 180; lon += 2) {
-                southBoundary.push([-80, lon]);
-                northBoundary.push([84, lon]);
-            }
-            
-            utmGridLines.push({
-                coords: southBoundary,
-                color: '#ffcc80',
-                type: 'utm_boundary_south'
-            });
-            
-            utmGridLines.push({
-                coords: northBoundary,
-                color: '#ffcc80',
-                type: 'utm_boundary_north'
-            });
-            
-            return utmGridLines;
-        }
-        
-        // تابع برای ایجاد گرید جغرافیایی سنتی
-        function createGeographicGrid() {
-            const geoGridLines = [];
-            const geoColor = '#ff5252'; // قرمز
-            
-            // خطوط طول جغرافیایی (هر 15 درجه)
-            for (let lon = -180; lon <= 180; lon += 15) {
-                const line = [];
-                for (let lat = -90; lat <= 90; lat += 2) {
-                    // اطمینان از محدوده معتبر
-                    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+                
+                // خطوط عرضی UTM
+                for (let lat = -80; lat <= 84; lat += latStep) {
+                    const line = [];
+                    for (let lon = -180; lon <= 180; lon += pointDensity) {
                         line.push([lat, lon]);
                     }
+                    if (line.length > 0) {
+                        gridLines.push({
+                            coords: line,
+                            color: color,
+                            type: 'utm_parallel'
+                        });
+                    }
                 }
-                if (line.length > 0) {
-                    geoGridLines.push({
+            } else {
+                // خطوط طول جغرافیایی
+                for (let lon = -180; lon <= 180; lon += lonStep) {
+                    const line = [];
+                    for (let lat = -90; lat <= 90; lat += pointDensity) {
+                        line.push([lat, lon]);
+                    }
+                    gridLines.push({
                         coords: line,
-                        color: geoColor,
+                        color: color,
                         type: 'geo_meridian'
                     });
                 }
-            }
-            
-            // خطوط عرض جغرافیایی (هر 15 درجه)
-            for (let lat = -90; lat <= 90; lat += 15) {
-                const line = [];
-                for (let lon = -180; lon <= 180; lon += 2) {
-                    // اطمینان از محدوده معتبر
-                    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+                
+                // خطوط عرض جغرافیایی
+                for (let lat = -90; lat <= 90; lat += latStep) {
+                    const line = [];
+                    for (let lon = -180; lon <= 180; lon += pointDensity) {
                         line.push([lat, lon]);
                     }
-                }
-                if (line.length > 0) {
-                    geoGridLines.push({
+                    gridLines.push({
                         coords: line,
-                        color: geoColor,
+                        color: color,
                         type: 'geo_parallel'
                     });
                 }
             }
             
-            // خط استوا با رنگ متفاوت
-            const equator = [];
-            for (let lon = -180; lon <= 180; lon += 2) {
-                equator.push([0, lon]);
-            }
-            geoGridLines.push({
-                coords: equator,
-                color: '#ffcc80',
-                type: 'equator'
-            });
-            
-            // نصف‌النهار مبدأ با رنگ متفاوت
-            const primeMeridian = [];
-            for (let lat = -90; lat <= 90; lat += 2) {
-                primeMeridian.push([lat, 0]);
-            }
-            geoGridLines.push({
-                coords: primeMeridian,
-                color: '#ffcc80',
-                type: 'prime_meridian'
-            });
-            
-            return geoGridLines;
+            return gridLines;
         }
         
-        // تابع به‌روزرسانی گرید با خطوط ثابت (بدون انیمیشن)
+        // 🔧 تابع به‌روزرسانی گریدها
         function updateGrids() {
             let allPaths = [];
             
             if (utmGridEnabled) {
-                const utmGrid = createUTMGrid();
-                // اطمینان از معتبر بودن تمام نقاط
-                const validUTMGrid = utmGrid.filter(path => {
-                    return path.coords.every(coord => {
-                        const [lat, lon] = coord;
-                        return !isNaN(lat) && !isNaN(lon) && 
-                               lat >= -90 && lat <= 90 && 
-                               lon >= -180 && lon <= 180;
-                    });
-                });
-                allPaths = allPaths.concat(validUTMGrid);
+                allPaths = allPaths.concat(createSmartGrid('utm'));
             }
             
             if (geoGridEnabled) {
-                const geoGrid = createGeographicGrid();
-                // اطمینان از معتبر بودن تمام نقاط
-                const validGeoGrid = geoGrid.filter(path => {
-                    return path.coords.every(coord => {
-                        const [lat, lon] = coord;
-                        return !isNaN(lat) && !isNaN(lon) && 
-                               lat >= -90 && lat <= 90 && 
-                               lon >= -180 && lon <= 180;
-                    });
-                });
-                allPaths = allPaths.concat(validGeoGrid);
+                allPaths = allPaths.concat(createSmartGrid('geo'));
             }
             
-            // اعمال گرید به کره با خطوط ثابت (بدون dash و انیمیشن)
+            // اعمال گرید با تنظیمات هوشمند
             globe.pathsData(allPaths)
                 .pathPoints(d => d.coords)
                 .pathColor(d => d.color)
-                .pathStroke(0.7)  // خطوط نازک‌تر برای وضوح بیشتر
-                .pathDashLength(0)  // بدون dash (خط پیوسته)
-                .pathDashGap(0)     // بدون فاصله
-                .pathDashAnimateTime(0);  // بدون انیمیشن
+                .pathStroke(performanceMode ? 0.5 : 0.7)
+                .pathDashLength(0)
+                .pathDashGap(0)
+                .pathDashAnimateTime(0);
             
             // به‌روزرسانی وضعیت
             document.getElementById('utm-status').textContent = `UTM: ${utmGridEnabled ? 'روشن' : 'خاموش'}`;
@@ -488,7 +641,7 @@
             document.getElementById('toggle-geo-grid').className = geoGridEnabled ? 'active' : '';
         }
         
-        // کنترل‌های گرید
+        // 🔧 کنترل‌های رابط کاربری
         document.getElementById('toggle-utm-grid').addEventListener('click', function() {
             utmGridEnabled = !utmGridEnabled;
             updateGrids();
@@ -511,62 +664,139 @@
             updateGrids();
         });
         
-        // فعال کردن چرخش خودکار
-        globe.controls().autoRotate = true;
+        // 🔧 کنترل عملکردی
+        document.getElementById('performance-toggle').addEventListener('click', function() {
+            performanceMode = !performanceMode;
+            performanceModeElement.style.display = performanceMode ? 'block' : 'none';
+            
+            // بازسازی برچسب‌ها با حالت جدید
+            labels = createSmartLabels();
+            globe.labelsData(labels);
+            
+            // بازسازی گریدها
+            updateGrids();
+            
+            // تغییر متن دکمه
+            this.textContent = performanceMode ? '🚀 حالت عادی' : '🔋 بهینه‌سازی عملکرد';
+            performanceModeElement.textContent = performanceMode ? 
+                `🔋 حالت عملکردی فعال (${deviceInfo.memory}GB RAM)` : '';
+        });
+        
+        // تنظیمات اولیه کره
+        globe.controls().autoRotate = !deviceInfo.isMobile; // در موبایل اولیه غیرفعال
         globe.controls().autoRotateSpeed = 0.6;
         globe.controls().enableZoom = true;
+        globe.controls().enablePan = deviceInfo.isDesktop; // در موبایل پن غیرفعال
+        globe.controls().dampingFactor = 0.1;
         
-        // کنترل‌های رابط کاربری
+        // 🔧 کنترل چرخش
         document.getElementById('rotation-speed').addEventListener('change', function(e) {
             const speed = parseFloat(e.target.value);
             globe.controls().autoRotate = speed > 0;
             globe.controls().autoRotateSpeed = speed;
         });
         
+        // 🔧 کنترل نمایش برچسب‌ها
         document.getElementById('label-visibility').addEventListener('change', function(e) {
             const visibility = e.target.value;
             
-            const updatedLabels = labels.map(label => {
-                const newLabel = {...label};
+            if (visibility === 'optimized') {
+                // حالت هوشمند: تطبیق خودکار با دستگاه
+                const updatedLabels = labels.map(label => ({
+                    ...label,
+                    text: performanceMode ? `${label.zone}` : `${label.zone}${label.letter}`,
+                    size: deviceInfo.isMobile ? 0.8 : 1.2
+                }));
+                globe.labelsData(updatedLabels);
+            } else {
+                const updatedLabels = labels.map(label => {
+                    const newLabel = {...label};
+                    
+                    if (visibility === 'all') {
+                        newLabel.text = `${label.zone}${label.letter}`;
+                        newLabel.size = deviceInfo.isMobile ? 0.9 : 1.2;
+                    } else if (visibility === 'zones') {
+                        newLabel.text = `${label.zone}`;
+                        newLabel.size = deviceInfo.isMobile ? 1.0 : 1.5;
+                    } else if (visibility === 'letters') {
+                        newLabel.text = `${label.letter}`;
+                        newLabel.size = deviceInfo.isMobile ? 0.9 : 1.2;
+                    } else {
+                        newLabel.text = '';
+                        newLabel.size = 0;
+                    }
+                    
+                    return newLabel;
+                });
                 
-                if (visibility === 'all') {
-                    newLabel.text = `${label.zone}${label.letter}`;
-                    newLabel.size = 1.2;
-                } else if (visibility === 'zones') {
-                    newLabel.text = `${label.zone}`;
-                    newLabel.size = 1.5;
-                } else if (visibility === 'letters') {
-                    newLabel.text = `${label.letter}`;
-                    newLabel.size = 1.2;
-                } else {
-                    newLabel.text = '';
-                    newLabel.size = 0;
-                }
-                
-                return newLabel;
-            });
-            
-            globe.labelsData(updatedLabels);
+                globe.labelsData(updatedLabels);
+            }
         });
         
+        // 🔧 بازنشانی نمای کره
         document.getElementById('reset-view').addEventListener('click', function() {
-            globe.pointOfView({ lat: 0, lng: 0, altitude: 2.5 }, 1000);
+            const initialView = deviceInfo.isMobile ? 
+                { lat: 30, lng: 50, altitude: 2.2 } :  // زوم بیشتر در موبایل
+                { lat: 20, lng: 50, altitude: 2.0 };
+            
+            globe.pointOfView(initialView, 1000);
             document.getElementById('selected-zone').textContent = 'روی یک زون کلیک کنید';
         });
         
-        // تنظیم نمای اولیه
-        globe.pointOfView({ lat: 20, lng: 50, altitude: 2 });
+        // 🔧 تنظیم نمای اولیه با توجه به دستگاه
+        const initialView = deviceInfo.isMobile ? 
+            { lat: 30, lng: 50, altitude: 2.2 } : 
+            { lat: 20, lng: 50, altitude: 2.0 };
         
-        // اطلاعات اولیه
-        document.getElementById('selected-zone').innerHTML = 
-            'روی هر یک از <span class="highlight">۱۲۰۰ زون UTM</span> کلیک کنید<br>' 
-           
-            
+        globe.pointOfView(initialView);
         
-        // بارگذاری گریدها با تاخیر
+        // 🔧 بارگذاری گریدها با تاخیر هوشمند
         setTimeout(() => {
             updateGrids();
-        }, 500);
+        }, deviceInfo.isMobile ? 1000 : 500);
+        
+        // 🔧 تطبیق با تغییر سایز پنجره
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const newWidth = window.innerWidth;
+                const newHeight = window.innerHeight;
+                
+                // اگر دستگاه تغییر کرد (مثلا چرخش صفحه)
+                if (newWidth < 768 && !performanceMode) {
+                    performanceMode = true;
+                    performanceModeElement.style.display = 'block';
+                    
+                    // بازسازی با تنظیمات جدید
+                    labels = createSmartLabels();
+                    globe.labelsData(labels);
+                    updateGrids();
+                }
+            }, 250);
+        });
+        
+        // 🔧 اطلاعات اولیه
+        document.getElementById('selected-zone').innerHTML = 
+            `روی هر یک از <span class="highlight">${labels.length} زون UTM</span> کلیک کنید<br>
+             <small>حالت فعلی: ${performanceMode ? 'عملکردی' : 'عادی'} | دستگاه: ${deviceInfo.isMobile ? 'موبایل' : deviceInfo.isTablet ? 'تبلت' : 'دسکتاپ'}</small>`;
+        
+        // 🔧 جلوگیری از اسکرول تصادفی در موبایل
+        if (deviceInfo.isTouch) {
+            document.addEventListener('touchmove', function(e) {
+                if (e.target.closest('#globe-container')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
+        
+        // 🔧 نمایش پیام آماده شدن
+        console.log(`✅ برنامه آماده است! تنظیمات: 
+        - دستگاه: ${deviceInfo.isMobile ? 'موبایل' : deviceInfo.isTablet ? 'تبلت' : 'دسکتاپ'}
+        - RAM: ${deviceInfo.memory}GB
+        - حالت عملکردی: ${performanceMode ? 'فعال' : 'غیرفعال'}
+        - برچسب‌ها: ${labels.length}
+        - رزولوشن: ${deviceInfo.screenWidth}×${deviceInfo.screenHeight}`);
     </script>
 </body>
 </html>
